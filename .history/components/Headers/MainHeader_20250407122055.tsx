@@ -1,10 +1,10 @@
 import React from "react";
-import LogoBar from "./LogoBar";
+import Logo from "./Logo";
 
 const MainHeader = () => {
   return (
     <header>
-      <LogoBar />
+      <Logo />
     </header>
   );
 };

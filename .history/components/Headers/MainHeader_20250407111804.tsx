@@ -1,10 +1,10 @@
 import React from "react";
-import LogoBar from "./LogoBar";
+import { ModeToggle } from "../mode-toggle";
 
 const MainHeader = () => {
   return (
     <header>
-      <LogoBar />
+      <ModeToggle />
     </header>
   );
 };

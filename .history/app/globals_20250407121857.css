@@ -88,6 +88,51 @@
   --sidebar-ring: #23d5d5;
 }
 
+.dark {
+  /* Base Colors (Dark Mode) */
+  --background: #1a1a1a; /* Dark Neutral */
+  --foreground: #f8f8f8; /* Light Neutral */
+  --card: oklch(0.2 0.01 286); /* Slightly lighter than background */
+  --card-foreground: #f8f8f8;
+  --popover: oklch(0.2 0.01 286);
+  --popover-foreground: #f8f8f8;
+
+  /* Accents (Same as light mode) */
+  --primary: #23d5d5; /* Cyan Blue */
+  --primary-foreground: #1a1a1a; /* Dark text on primary */
+  --secondary: #c14600; /* Burnt Orange */
+  --secondary-foreground: #f8f8f8; /* Light text on secondary */
+
+  /* Muted/Utility */
+  --muted: oklch(0.2 0.01 286); /* Dark gray */
+  --muted-foreground: oklch(0.7 0.01 286);
+  --accent: #c14600;
+  --accent-foreground: #f8f8f8;
+  --destructive: oklch(0.7 0.25 27); /* Brighter red for dark mode */
+
+  /* Borders/Inputs */
+  --border: oklch(0.25 0.01 286); /* Darker border */
+  --input: oklch(0.25 0.01 286);
+  --ring: #23d5d5;
+
+  /* Charts (Dark Mode) */
+  --chart-1: #23d5d5;
+  --chart-2: #c14600;
+  --chart-3: oklch(0.5 0.2 227); /* Brighter purple */
+  --chart-4: oklch(0.6 0.15 84); /* Brighter green */
+  --chart-5: oklch(0.7 0.15 70);
+
+  /* Sidebar (Dark Mode) */
+  --sidebar: oklch(0.2 0.01 286);
+  --sidebar-foreground: #f8f8f8;
+  --sidebar-primary: #23d5d5;
+  --sidebar-primary-foreground: #1a1a1a;
+  --sidebar-accent: #c14600;
+  --sidebar-accent-foreground: #f8f8f8;
+  --sidebar-border: oklch(0.25 0.01 286);
+  --sidebar-ring: #23d5d5;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

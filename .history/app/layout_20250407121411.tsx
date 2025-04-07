@@ -3,6 +3,7 @@ import { Lato } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import MainHeader from "@/components/Headers/MainHeader";
+import { Providers } from "@/components/providers";
 import InfoNav from "@/components/Headers/InfoNav";
 import FooterSection from "@/components/Footer/FooterSection";
 
@@ -36,9 +37,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${lato.className} antialiased`}>
-        <InfoNav />
-        <MainHeader /> {children}
-        <FooterSection />
+        <Providers>
+          <InfoNav />
+          <MainHeader /> {children}
+          <FooterSection />
+        </Providers>
       </body>
     </html>
   );

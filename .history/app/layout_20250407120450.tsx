@@ -3,8 +3,10 @@ import { Lato } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import MainHeader from "@/components/Headers/MainHeader";
+import { Providers } from "@/components/providers";
 import InfoNav from "@/components/Headers/InfoNav";
-import FooterSection from "@/components/Footer/FooterSection";
+import Newsletter from "@/components/Footer/Newsletter";
+import Footer from "@/components/Footer/Footer";
 
 const lato = Lato({
   weight: ["400", "700"],
@@ -36,9 +38,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${lato.className} antialiased`}>
-        <InfoNav />
-        <MainHeader /> {children}
-        <FooterSection />
+        <Providers>
+          <InfoNav />
+          <MainHeader /> {children}
+          <Newsletter />
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
