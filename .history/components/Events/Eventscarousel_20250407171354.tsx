@@ -59,21 +59,15 @@ const EventsCarousel = () => {
 
   return (
     <div className=" max-w-7xl mx-auto justify-center items-center">
-      <div className="flex items-center py-6 px-6 gap-3">
-        <div className="flex items-center">
-          <div className="relative w-5 h-5 mr-1.5">
-            <div className="absolute w-full h-full border-2 border-[#247373] rounded-full"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#c14600] rounded-full"></div>
-          </div>
-
-          <div className="flex gap-1">
-            <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
-            <div className="w-1.5 h-4 bg-[#c14600] transform -skew-x-12"></div>
-            <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
-          </div>
-        </div>
-
+      <div className="flex items-center pl-9 pt-12 md:pl-0">
         <h2 className="text-xl font-bold">Upcoming Events</h2>
+        <div className="ml-4 flex items-center space-x-1">
+          <div className="h-3 w-1 bg-[#247373]"></div>
+          <div className="h-4 w-1 bg-[#247373]"></div>
+          <div className="h-5 w-1 bg-[#247373]"></div>
+          <div className="h-4 w-1 bg-[#247373]"></div>
+          <div className="h-3 w-1 bg-[#247373]"></div>
+        </div>
       </div>
       <Carousel
         className="w-full py-3 px-4"
@@ -89,10 +83,7 @@ const EventsCarousel = () => {
       >
         <CarouselContent>
           {events.map((event) => (
-            <CarouselItem
-              key={event.id}
-              className="basis-1/2 lg:basis-1/4 px-2"
-            >
+            <CarouselItem key={event.id} className="basis-1/4 px-2">
               <EventCard
                 imageUrl={event.imageUrl}
                 imageAlt={event.imageAlt}

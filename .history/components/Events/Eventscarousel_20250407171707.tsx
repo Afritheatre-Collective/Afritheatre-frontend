@@ -59,21 +59,47 @@ const EventsCarousel = () => {
 
   return (
     <div className=" max-w-7xl mx-auto justify-center items-center">
-      <div className="flex items-center py-6 px-6 gap-3">
+      <div className="relative">
         <div className="flex items-center">
-          <div className="relative w-5 h-5 mr-1.5">
-            <div className="absolute w-full h-full border-2 border-[#247373] rounded-full"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#c14600] rounded-full"></div>
+          {/* African theatre pattern */}
+          <div className="hidden md:block w-24 h-16 mr-4">
+            <svg viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M20,10 Q50,-10 80,10 Q90,30 75,50 Q50,60 25,50 Q10,30 20,10 Z"
+                fill="#247373"
+                opacity="0.8"
+              />
+
+              <path
+                d="M30,20 L40,15 L50,25 L60,15 L70,20"
+                stroke="#c14600"
+                strokeWidth="2"
+                fill="none"
+              />
+              <circle cx="50" cy="35" r="5" fill="#c14600" />
+              <path
+                d="M35,45 L45,40 L55,50 L65,40"
+                stroke="#247373"
+                strokeWidth="2"
+                fill="none"
+              />
+
+              <path d="M15,25 L25,35 L15,45" stroke="#c14600" strokeWidth="2" />
+              <path d="M85,25 L75,35 L85,45" stroke="#c14600" strokeWidth="2" />
+            </svg>
           </div>
 
-          <div className="flex gap-1">
-            <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
-            <div className="w-1.5 h-4 bg-[#c14600] transform -skew-x-12"></div>
-            <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
+          <h2 className="text-xl font-bold pl-9 pt-12 md:pl-0">
+            Upcoming Events
+          </h2>
+
+          <div className="md:hidden absolute left-0 top-12 w-8 h-8">
+            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5,5 L15,5 L10,15 Z" fill="#247373" opacity="0.6" />
+              <circle cx="10" cy="5" r="2" fill="#c14600" />
+            </svg>
           </div>
         </div>
-
-        <h2 className="text-xl font-bold">Upcoming Events</h2>
       </div>
       <Carousel
         className="w-full py-3 px-4"
@@ -89,10 +115,7 @@ const EventsCarousel = () => {
       >
         <CarouselContent>
           {events.map((event) => (
-            <CarouselItem
-              key={event.id}
-              className="basis-1/2 lg:basis-1/4 px-2"
-            >
+            <CarouselItem key={event.id} className="basis-1/4 px-2">
               <EventCard
                 imageUrl={event.imageUrl}
                 imageAlt={event.imageAlt}

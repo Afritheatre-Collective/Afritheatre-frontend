@@ -6,9 +6,17 @@ interface EventCardProps {
   imageUrl: string;
   imageAlt: string;
   eventTitle: string;
+  eventDate?: string;
+  eventLocation?: string;
 }
 
-const EventCard = ({ imageUrl, imageAlt, eventTitle }: EventCardProps) => {
+const EventCard = ({
+  imageUrl,
+  imageAlt,
+  eventTitle,
+  eventDate,
+  eventLocation,
+}: EventCardProps) => {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <CardContent className="relative p-0 aspect-video">
@@ -20,7 +28,7 @@ const EventCard = ({ imageUrl, imageAlt, eventTitle }: EventCardProps) => {
           className="object-cover"
         />
       </CardContent>
-      <CardFooter className="flex flex-col items-start px-4 py-3 gap-1">
+      <CardFooter className="flex flex-col items-start p-4 gap-1">
         <h3 className="font-semibold text-lg line-clamp-2">{eventTitle}</h3>
       </CardFooter>
     </Card>

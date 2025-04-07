@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { FaSearch, FaUserCircle } from "react-icons/fa";
+import { FaSearch, FaUserCircle, FaBars } from "react-icons/fa";
 import Logo from "./Logo";
 import { Button } from "../ui/button";
 import Link from "next/link";
@@ -15,6 +15,8 @@ import {
 import { MobileNav } from "./MobileNav";
 
 const Header = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       {/* LogoBar */}
@@ -28,10 +30,17 @@ const Header = () => {
         <NavLinks />
       </nav>
 
-      {/* Mobile Menu Button - Uses the Sheet component from MobileNav */}
+      {/* Mobile Menu Button */}
       <div className="md:hidden flex justify-center py-2">
         <MobileNav />
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white py-2 px-4 shadow-inner">
+          <MobileNavLinks />
+        </div>
+      )}
     </header>
   );
 };
@@ -179,6 +188,31 @@ const NavLinks = () => {
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
+  );
+};
+
+const MobileNavLinks = () => {
+  return (
+    <div className="flex flex-col space-y-2">
+      <Link href="/" className="px-4 py-2 hover:bg-gray-100 rounded">
+        Home
+      </Link>
+      <Link href="/about" className="px-4 py-2 hover:bg-gray-100 rounded">
+        About
+      </Link>
+      <Link href="/events" className="px-4 py-2 hover:bg-gray-100 rounded">
+        Events
+      </Link>
+      <Link href="/resources" className="px-4 py-2 hover:bg-gray-100 rounded">
+        Resources
+      </Link>
+      <Link href="/stories" className="px-4 py-2 hover:bg-gray-100 rounded">
+        Stories
+      </Link>
+      <Link href="/contact" className="px-4 py-2 hover:bg-gray-100 rounded">
+        Contact
+      </Link>
+    </div>
   );
 };
 
