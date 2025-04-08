@@ -38,12 +38,21 @@ const Header = () => {
 
 const LogoBar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const modalRef = useRef<HTMLDivElement>(null);
+  const searchModalRef = useRef<HTMLDivElement>(null);
+  const accountModalRef = useRef<HTMLDivElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const accountButtonRef = useRef<HTMLDivElement>(null);
 
   const handleSearchClick = () => {
     setIsSearchOpen(!isSearchOpen);
+    if (isAccountOpen) setIsAccountOpen(false);
+  };
+
+  const handleAccountClick = () => {
+    setIsAccountOpen(!isAccountOpen);
+    if (isSearchOpen) setIsSearchOpen(false);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -55,31 +64,69 @@ const LogoBar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Close search modal if clicked outside
       if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node) &&
+        isSearchOpen &&
+        searchModalRef.current &&
+        !searchModalRef.current.contains(event.target as Node) &&
         searchButtonRef.current &&
         !searchButtonRef.current.contains(event.target as Node)
       ) {
         setIsSearchOpen(false);
       }
+
+      // Close account modal if clicked outside
+      if (
+        isAccountOpen &&
+        accountModalRef.current &&
+        !accountModalRef.current.contains(event.target as Node) &&
+        accountButtonRef.current &&
+        !accountButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsAccountOpen(false);
+      }
     };
 
-    if (isSearchOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isSearchOpen]);
+  }, [isSearchOpen, isAccountOpen]);
 
   return (
     <div className="relative flex items-center max-w-6xl mx-auto justify-between px-4 py-3 bg-white">
       {/* Left side - Account (hidden on mobile) */}
-      <div className="hidden md:flex cursor-pointer items-center space-x-2">
+      <div
+        ref={accountButtonRef}
+        className="hidden md:flex cursor-pointer items-center space-x-2"
+        onClick={handleAccountClick}
+      >
         <FaUserCircle className="text-2xl text-gray-600" />
         <span className="text-sm font-medium">My Account</span>
+
+        {/* Account Modal */}
+        {isAccountOpen && (
+          <div
+            ref={accountModalRef}
+            className="absolute left-0 top-full mt-2 w-64 bg-white rounded-md shadow-lg z-10 p-4"
+          >
+            <div className="flex flex-col gap-4">
+              <p className="text-center">Create account/login</p>
+              <Link href="/sign-up" passHref>
+                <Button className="w-full text-white cursor-pointer">
+                  Sign Up
+                </Button>
+              </Link>
+              <div className="text-sm text-center">
+                Already have an account?{" "}
+                <Link href="/login" className="text-[#c14600] hover:underline">
+                  Login
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Center - Logo */}
@@ -101,7 +148,7 @@ const LogoBar = () => {
         {/* Search Modal */}
         {isSearchOpen && (
           <div
-            ref={modalRef}
+            ref={searchModalRef}
             className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-10"
           >
             <form onSubmit={handleSearchSubmit} className="p-2">

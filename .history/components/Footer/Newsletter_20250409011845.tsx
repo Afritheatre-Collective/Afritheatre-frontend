@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 
 const Newsletter = () => {
   return (
-    <div className=" bg-[#c14600]">
+    <footer className=" bg-[#c14600]">
       <div className=" max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 px-5 py-20">
         <div className="text-4xl text-white font-semibold">
           Stay Updated in the Theatre Space
@@ -19,7 +19,7 @@ const Newsletter = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </footer>
   );
 };
 

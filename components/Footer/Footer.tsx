@@ -1,7 +1,13 @@
 import React from "react";
-import { FaFacebook, FaInstagram, FaTiktok } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaTiktok,
+  FaYoutube,
+} from "react-icons/fa";
 import { siteConfig } from "@/config/site";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaThreads, FaXTwitter } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -50,7 +56,34 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <FaTiktok className="text-2xl hover:text-blue-600 transition-colors" />
+                <FaTiktok className="text-2xl hover:text-black transition-colors" />
+              </a>
+            )}
+            {siteConfig.links.youtube && (
+              <a
+                href={siteConfig.links.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaYoutube className="text-2xl hover:text-red-600 transition-colors" />
+              </a>
+            )}
+            {siteConfig.links.linkedin && (
+              <a
+                href={siteConfig.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaLinkedin className="text-2xl hover:text-blue-600 transition-colors" />
+              </a>
+            )}
+            {siteConfig.links.threads && (
+              <a
+                href={siteConfig.links.threads}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaThreads className="text-2xl hover:text-black transition-colors" />
               </a>
             )}
           </div>

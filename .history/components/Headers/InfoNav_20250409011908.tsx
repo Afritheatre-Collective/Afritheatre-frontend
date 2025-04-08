@@ -13,7 +13,7 @@ import { FaThreads, FaXTwitter } from "react-icons/fa6";
 
 const InfoNav = () => {
   return (
-    <div className=" px-4 py-2 bg-[#c14600] text-white">
+    <header className=" px-4 py-2 bg-[#c14600] text-white">
       <div className=" max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         {/* Phone Number (Left) */}
         <div className=" hidden md:flex items-center mb-2 md:mb-0">
@@ -104,7 +104,7 @@ const InfoNav = () => {
           </a>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 
