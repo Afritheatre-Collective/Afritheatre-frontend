@@ -91,7 +91,7 @@ const EventsCarousel = () => {
           {events.map((event) => (
             <CarouselItem
               key={event.id}
-              className="basis-1/2 lg:basis-1/4 px-2"
+              className="basis-1/1 lg:basis-1/4 px-2"
             >
               <EventCard
                 imageUrl={event.imageUrl}
