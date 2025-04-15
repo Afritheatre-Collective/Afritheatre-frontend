@@ -17,73 +17,55 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const SignupForm = () => {
+const SigninForm = () => {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
-  const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
-
-    if (e.target.id === "password" || e.target.id === "confirmPassword") {
-      setPasswordError("");
-    }
-  };
-
-  const validatePasswords = () => {
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordError("Passwords do not match");
-      return false;
-    }
-    if (formData.password.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
-      return false;
-    }
-    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
-    if (!validatePasswords()) {
-      setLoading(false);
+    // Basic client-side validation
+    if (!formData.email || !formData.password) {
+      toast.error("Email and password are required", {
+        position: "bottom-right",
+      });
       return;
     }
 
+    setLoading(true);
+
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
-          name: formData.name,
           email: formData.email,
           password: formData.password,
         }),
       });
 
       const data = await res.json();
-      if (res.ok) {
-        toast.success("Registration successful!", {
-          position: "bottom-right",
-        });
-        setFormData({ name: "", email: "", password: "", confirmPassword: "" });
-        // Redirect to login page after successful registration
-        router.push("/login");
-      } else {
-        toast.error(data.message || "Registration failed", {
-          position: "bottom-right",
-        });
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
       }
+
+      toast.success("Login successful!", { position: "bottom-right" });
+      router.push("/");
     } catch (err) {
-      console.error(err);
-      toast.error("Server error", {
+      console.error("Login error:", err);
+      toast.error(err instanceof Error ? err.message : "Server error", {
         position: "bottom-right",
       });
     } finally {
@@ -95,26 +77,14 @@ const SignupForm = () => {
     <div className="h-full flex items-center justify-center backdrop-blur-lg">
       <Card className="md:h-auto w-[80%] sm:w-[420px] p-4 my-10 sm:p-8">
         <CardHeader>
-          <CardTitle className="text-center">Register</CardTitle>
+          <CardTitle className="text-center">Login</CardTitle>
           <CardDescription className="text-sm text-center text-accent-foreground">
-            Use email or service to create account
+            Use email or service to sign in to your account
           </CardDescription>
         </CardHeader>
 
         <CardContent className="px-2 sm:px-6">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                className="border-0 border-b rounded-none px-0 focus-visible:ring-0 focus-visible:border-b-primary"
-                required
-              />
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -139,28 +109,13 @@ const SignupForm = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="border-0 border-b rounded-none px-0 focus-visible:ring-0 focus-visible:border-b-primary"
-                required
-              />
-              {passwordError && (
-                <p className="text-sm text-red-500">{passwordError}</p>
-              )}
-            </div>
-
             <Button
               className="w-full text-white"
               size="lg"
               type="submit"
               disabled={loading}
             >
-              {loading ? "Registering..." : "Register"}
+              {loading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
@@ -177,12 +132,12 @@ const SignupForm = () => {
             </Button>
           </div>
           <p className="text-center text-sm mt-2 text-muted-foreground">
-            Already have an account?
+            Don&apos;t have an account?
             <Link
               className="text-sky-700 ml-2 hover:underline cursor-pointer"
-              href="/login"
+              href="/sign-up"
             >
-              Login
+              Sign up
             </Link>
           </p>
         </CardContent>
@@ -191,4 +146,4 @@ const SignupForm = () => {
   );
 };
 
-export default SignupForm;
+export default SigninForm;

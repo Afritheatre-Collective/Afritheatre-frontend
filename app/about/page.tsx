@@ -3,9 +3,30 @@ import React, { useEffect, useRef } from "react";
 import { FiUsers, FiGlobe, FiAward, FiFilm } from "react-icons/fi";
 import { motion, useAnimation, useInView } from "framer-motion";
 
+interface StatItem {
+  id: number;
+  name: string;
+  value: number;
+  suffix: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface ImpactItem {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+}
+
+interface CounterProps {
+  from?: number;
+  to: number;
+  duration?: number;
+  suffix?: string;
+}
+
 const AboutUs = () => {
   // Animation for counter
-  const counterRef = useRef(null);
+  const counterRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(counterRef, { once: true });
   const controls = useAnimation();
 
@@ -16,7 +37,7 @@ const AboutUs = () => {
   }, [isInView, controls]);
 
   // Stats data
-  const stats = [
+  const stats: StatItem[] = [
     { id: 1, name: "Shows Recorded", value: 1250, suffix: "+", icon: FiFilm },
     { id: 2, name: "Happy Clients", value: 350, suffix: "+", icon: FiUsers },
     { id: 3, name: "Countries Reached", value: 45, suffix: "", icon: FiGlobe },
@@ -24,7 +45,7 @@ const AboutUs = () => {
   ];
 
   // Impact data
-  const impacts = [
+  const impacts: ImpactItem[] = [
     {
       icon: FiUsers,
       title: "Community Building",
@@ -49,7 +70,12 @@ const AboutUs = () => {
   ];
 
   // Counter component
-  const Counter = ({ from = 0, to, duration = 2, suffix = "" }) => {
+  const Counter = ({
+    from = 0,
+    to,
+    duration = 2,
+    suffix = "",
+  }: CounterProps) => {
     const [count, setCount] = React.useState(from);
 
     useEffect(() => {
@@ -68,7 +94,7 @@ const AboutUs = () => {
       }, 1000 / 60);
 
       return () => clearInterval(timer);
-    }, [from, to, duration, isInView]);
+    }, [from, to, duration]); // Removed isInView from dependencies as it's from outer scope
 
     return (
       <span className="text-4xl font-bold text-[#247373]">
@@ -162,7 +188,22 @@ const AboutUs = () => {
         ref={counterRef}
         className="py-12 px-6 bg-gradient-to-r from-[#247373]/10 to-[#c14600]/10"
       >
-        <h3 className="text-2xl font-bold text-center mb-12">By The Numbers</h3>
+        <div className="flex items-center py-6 px-6 gap-3">
+          <div className="flex items-center">
+            <div className="relative w-5 h-5 mr-1.5">
+              <div className="absolute w-full h-full border-2 border-[#247373] rounded-full"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#c14600] rounded-full"></div>
+            </div>
+
+            <div className="flex gap-1">
+              <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
+              <div className="w-1.5 h-4 bg-[#c14600] transform -skew-x-12"></div>
+              <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
+            </div>
+          </div>
+
+          <h2 className="text-xl font-bold">By The Numbers</h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {stats.map((stat) => (
             <motion.div
@@ -190,7 +231,22 @@ const AboutUs = () => {
 
       {/* Impact Section */}
       <div className="py-12 px-6">
-        <h3 className="text-2xl font-bold text-center mb-12">Our Impact</h3>
+        <div className="flex items-center py-6 px-6 gap-3">
+          <div className="flex items-center">
+            <div className="relative w-5 h-5 mr-1.5">
+              <div className="absolute w-full h-full border-2 border-[#247373] rounded-full"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-[#c14600] rounded-full"></div>
+            </div>
+
+            <div className="flex gap-1">
+              <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
+              <div className="w-1.5 h-4 bg-[#c14600] transform -skew-x-12"></div>
+              <div className="w-1.5 h-4 bg-[#247373] transform skew-x-12"></div>
+            </div>
+          </div>
+
+          <h2 className="text-xl font-bold">Our Impact</h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {impacts.map((impact, index) => (
             <motion.div

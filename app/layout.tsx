@@ -5,6 +5,7 @@ import { siteConfig } from "@/config/site";
 import MainHeader from "@/components/Headers/MainHeader";
 import InfoNav from "@/components/Headers/InfoNav";
 import FooterSection from "@/components/Footer/FooterSection";
+import { Toaster } from "@/components/ui/sonner";
 
 const lato = Lato({
   weight: ["400", "700"],
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className={`${lato.className} antialiased`}>
         <InfoNav />
         <MainHeader /> {children}
+        <Toaster position="bottom-right" />
         <FooterSection />
       </body>
     </html>
