@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Lato } from "next/font/google";
+import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import MainHeader from "@/components/Headers/MainHeader";
@@ -7,11 +7,9 @@ import InfoNav from "@/components/Headers/InfoNav";
 import FooterSection from "@/components/Footer/FooterSection";
 import { Toaster } from "@/components/ui/sonner";
 
-const lato = Lato({
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
+const roboto_mono = Roboto_Mono({
   subsets: ["latin"],
-  variable: "--font-lato",
+  variable: "--font-roboto-mono",
   display: "swap",
 });
 
@@ -36,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lato.className} antialiased`}>
+      <body className={`${roboto_mono.className} antialiased`}>
         <InfoNav />
         <MainHeader /> {children}
         <Toaster position="bottom-right" />
