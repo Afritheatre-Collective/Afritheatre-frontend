@@ -1,9 +1,23 @@
-import React from "react";
+"use client";
+import Dashboard from "@/components/Dashboard/Dashboard";
+import SideBar from "@/components/DashboardComponent/SideBar";
+import React, { useState } from "react";
 
-type Props = {};
+// Define the allowed values for the 'selected' state
+type SelectedMenu = "overview" | "users" | "theatre-data";
 
-const page = (props: Props) => {
-  return <div>page</div>;
+const Page = () => {
+  // Set the initial state with one of the valid menu options
+  const [selected, setSelected] = useState<SelectedMenu>("overview");
+
+  return (
+    <div>
+      <div className="pt-12 pb-12 flex justify-center h-screen items-start gap-6">
+        <SideBar setSelected={setSelected} />
+        <Dashboard selected={selected} />
+      </div>
+    </div>
+  );
 };
 
-export default page;
+export default Page;
