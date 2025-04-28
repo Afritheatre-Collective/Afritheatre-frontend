@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -15,41 +16,9 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-interface TheatreActivityFormData {
-  month: string;
-  week: string;
-  date: string;
-  year: string;
-  time: string;
-  companyName: string;
-  sector: string;
-  companyStatus: string;
-  activityType: string;
-  nature: string;
-  eventName: string;
-  poster: File | null;
-  county: string;
-  venue: string;
-  newVenue: string;
-  totalSessions: string;
-  jobsCreated: string;
-  indirectJobs: string;
-  directJobs: string;
-  entryType: string;
-  bookingPlatform: string;
-  newBookingPlatform: string;
-  paymentMethods: string[];
-  language: string;
-  otherLanguage: string;
-  contactPerson: string;
-  email: string;
-  phone: string;
-  notes: string;
-}
-
 const TheatreActivity = () => {
-  const [step, setStep] = useState<number>(1);
-  const [formData, setFormData] = useState<TheatreActivityFormData>({
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
     month: "",
     week: "",
     date: "",
@@ -61,7 +30,6 @@ const TheatreActivity = () => {
     activityType: "",
     nature: "",
     eventName: "",
-    poster: null,
     county: "",
     venue: "",
     newVenue: "",
@@ -81,53 +49,136 @@ const TheatreActivity = () => {
     notes: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
-
-  const handleChange = <K extends keyof TheatreActivityFormData>(
+  const handleChange = <K extends keyof FormData>(
     field: K,
-    value: TheatreActivityFormData[K]
+    value: FormData[K]
   ) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    setSubmitSuccess(false);
+  type FormData = {
+    month: string;
+    week: string;
+    date: string;
+    year: string;
+    time: string;
+    companyName: string;
+    sector: string;
+    companyStatus: string;
+    activityType: string;
+    nature: string;
+    eventName: string;
+    county: string;
+    venue: string;
+    newVenue: string;
+    totalSessions: string;
+    jobsCreated: string;
+    indirectJobs: string;
+    directJobs: string;
+    entryType: string;
+    bookingPlatform: string;
+    newBookingPlatform: string;
+    paymentMethods: string[];
+    language: string;
+    otherLanguage: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    notes: string;
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    const loadingToastId = toast.loading("Submitting form...");
 
     try {
-      const { poster, ...dataToSend } = formData;
+      const response = await fetch(
+        "http://localhost:5000/api/theatre-activities",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
-      const res = await fetch("http://localhost:5000/api/theatre/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend),
-      });
+      const contentType = response.headers.get("content-type");
+      let responseData;
 
-      const responseData = await res.json();
-
-      if (!res.ok) {
-        throw new Error(responseData.message || "Failed to submit form");
-      }
-
-      console.log("Full response:", responseData);
-      setSubmitSuccess(true);
-
-      // Reset form after successful submission if needed
-      // setFormData({...initialFormState});
-    } catch (error) {
-      console.error("Full error:", error);
-      if (error instanceof Error) {
-        setSubmitError(error.message || "An error occurred while submitting");
+      if (contentType && contentType.includes("application/json")) {
+        responseData = await response.json();
       } else {
-        setSubmitError("An unknown error occurred while submitting");
+        const text = await response.text();
+        throw new Error(text || "Invalid server response");
       }
-    } finally {
-      setIsSubmitting(false);
+
+      if (!response.ok) {
+        throw new Error(
+          responseData.message ||
+            `Server error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      toast.success("Theatre activity submitted successfully!", {
+        id: loadingToastId,
+      });
+      console.log("Success:", responseData);
+
+      // Optional: Reset form after successful submission
+      setFormData({
+        month: "",
+        week: "",
+        date: "",
+        year: "",
+        time: "",
+        companyName: "",
+        sector: "",
+        companyStatus: "",
+        activityType: "",
+        nature: "",
+        eventName: "",
+        county: "",
+        venue: "",
+        newVenue: "",
+        totalSessions: "",
+        jobsCreated: "",
+        indirectJobs: "",
+        directJobs: "",
+        entryType: "",
+        bookingPlatform: "",
+        newBookingPlatform: "",
+        paymentMethods: [],
+        language: "",
+        otherLanguage: "",
+        contactPerson: "",
+        email: "",
+        phone: "",
+        notes: "",
+      });
+      setStep(1);
+    } catch (error) {
+      console.error("Submission error:", error);
+
+      let errorMessage = "Failed to submit form";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+
+        // Handle common error cases
+        if (errorMessage.includes("Failed to fetch")) {
+          errorMessage = "Network error - could not connect to server";
+        } else if (errorMessage.includes("<!DOCTYPE html>")) {
+          errorMessage = "Server returned an HTML error page";
+        }
+      }
+
+      toast.error(errorMessage, {
+        id: loadingToastId,
+        duration: 10000,
+        action: {
+          label: "Retry",
+          onClick: () => handleSubmit(formData),
+        },
+      });
     }
   };
 
@@ -168,26 +219,30 @@ const TheatreActivity = () => {
           onChange={(e) => handleChange("companyName", e.target.value)}
         />
 
-        <Label>Public or Private Sector</Label>
+        <Label className="font-bold">Public or Private Sector</Label>
         <RadioGroup
           onValueChange={(value) => handleChange("sector", value)}
           defaultValue={formData.sector}
         >
-          <RadioGroupItem value="public" id="public" />{" "}
-          <Label htmlFor="public">Public</Label>
-          <RadioGroupItem value="private" id="private" />{" "}
-          <Label htmlFor="private">Private</Label>
+          <div className="flex flex-col md:flex-row gap-4">
+            <RadioGroupItem value="public" id="public" />{" "}
+            <Label htmlFor="public">Public</Label>
+            <RadioGroupItem value="private" id="private" />{" "}
+            <Label htmlFor="private">Private</Label>
+          </div>
         </RadioGroup>
 
-        <Label>Company Status</Label>
+        <Label className="font-bold">Company Status</Label>
         <RadioGroup
           onValueChange={(value) => handleChange("companyStatus", value)}
           defaultValue={formData.companyStatus}
         >
-          <RadioGroupItem value="new" id="new" />{" "}
-          <Label htmlFor="new">New</Label>
-          <RadioGroupItem value="existing" id="existing" />{" "}
-          <Label htmlFor="existing">Existing</Label>
+          <div className="flex flex-col md:flex-row gap-4">
+            <RadioGroupItem value="new" id="new" />{" "}
+            <Label htmlFor="new">New</Label>
+            <RadioGroupItem value="existing" id="existing" />{" "}
+            <Label htmlFor="existing">Existing</Label>
+          </div>
         </RadioGroup>
 
         <Button onClick={() => setStep(2)} className="text-white">
@@ -203,41 +258,45 @@ const TheatreActivity = () => {
         <CardTitle>Section 2: Activity Details</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Label>Type of Activity</Label>
+        <Label className="font-bold">Type of Activity</Label>
         <RadioGroup
           onValueChange={(value) => handleChange("activityType", value)}
           defaultValue={formData.activityType}
         >
-          <RadioGroupItem value="performance" id="performance" />{" "}
-          <Label htmlFor="performance">Performance</Label>
-          <RadioGroupItem value="capacity" id="capacity" />{" "}
-          <Label htmlFor="capacity">Capacity Building Programs</Label>
-          <RadioGroupItem value="outreach" id="outreach" />{" "}
-          <Label htmlFor="outreach">Community Outreach & Engagements</Label>
+          <div className="flex flex-col md:flex-row gap-4">
+            <RadioGroupItem value="performance" id="performance" />{" "}
+            <Label htmlFor="performance">Performance</Label>
+            <RadioGroupItem value="capacity" id="capacity" />{" "}
+            <Label htmlFor="capacity">Capacity Building Programs</Label>
+            <RadioGroupItem value="outreach" id="outreach" />{" "}
+            <Label htmlFor="outreach">Community Outreach & Engagements</Label>
+          </div>
         </RadioGroup>
 
-        <Label>Nature of Activity</Label>
+        <Label className="font-bold">Nature of Activity</Label>
         <RadioGroup
           onValueChange={(value) => handleChange("nature", value)}
           defaultValue={formData.nature}
         >
-          <RadioGroupItem value="frequent-regular" id="frequent-regular" />{" "}
-          <Label htmlFor="frequent-regular">Frequent-Regular</Label>
-          <RadioGroupItem
-            value="frequent-irregular"
-            id="frequent-irregular"
-          />{" "}
-          <Label htmlFor="frequent-irregular">Frequent-Irregular</Label>
-          <RadioGroupItem
-            value="infrequent-regular"
-            id="infrequent-regular"
-          />{" "}
-          <Label htmlFor="infrequent-regular">Infrequent-Regular</Label>
-          <RadioGroupItem
-            value="infrequent-irregular"
-            id="infrequent-irregular"
-          />{" "}
-          <Label htmlFor="infrequent-irregular">Infrequent-Irregular</Label>
+          <div className="flex flex-col md:flex-row gap-4">
+            <RadioGroupItem value="frequent-regular" id="frequent-regular" />{" "}
+            <Label htmlFor="frequent-regular">Frequent-Regular</Label>
+            <RadioGroupItem
+              value="frequent-irregular"
+              id="frequent-irregular"
+            />{" "}
+            <Label htmlFor="frequent-irregular">Frequent-Irregular</Label>
+            <RadioGroupItem
+              value="infrequent-regular"
+              id="infrequent-regular"
+            />{" "}
+            <Label htmlFor="infrequent-regular">Infrequent-Regular</Label>
+            <RadioGroupItem
+              value="infrequent-irregular"
+              id="infrequent-irregular"
+            />{" "}
+            <Label htmlFor="infrequent-irregular">Infrequent-Irregular</Label>
+          </div>
         </RadioGroup>
 
         <Input
@@ -245,11 +304,7 @@ const TheatreActivity = () => {
           value={formData.eventName}
           onChange={(e) => handleChange("eventName", e.target.value)}
         />
-        <Label>Poster/Artwork</Label>
-        <Input
-          type="file"
-          onChange={(e) => handleChange("poster", e.target.files?.[0] || null)}
-        />
+
         <Input
           placeholder="County"
           value={formData.county}
@@ -312,15 +367,17 @@ const TheatreActivity = () => {
           onChange={(e) => handleChange("directJobs", e.target.value)}
         />
 
-        <Label>Entry Type</Label>
+        <Label className="font-bold">Entry Type</Label>
         <RadioGroup
           onValueChange={(value) => handleChange("entryType", value)}
           defaultValue={formData.entryType}
         >
-          <RadioGroupItem value="free" id="free" />{" "}
-          <Label htmlFor="free">Free</Label>
-          <RadioGroupItem value="paid" id="paid" />{" "}
-          <Label htmlFor="paid">Paid</Label>
+          <div className="flex flex-col md:flex-row gap-4">
+            <RadioGroupItem value="free" id="free" />{" "}
+            <Label htmlFor="free">Free</Label>
+            <RadioGroupItem value="paid" id="paid" />{" "}
+            <Label htmlFor="paid">Paid</Label>
+          </div>
         </RadioGroup>
 
         <Label>Booking Platform</Label>
@@ -419,34 +476,17 @@ const TheatreActivity = () => {
         {Object.entries(formData).map(([key, value]) => (
           <p key={key}>
             <strong>{key}:</strong>{" "}
-            {typeof value === "object"
-              ? value instanceof File
-                ? value.name
-                : JSON.stringify(value)
-              : value || "N/A"}
+            {Array.isArray(value) ? value.join(", ") : value || "N/A"}
           </p>
         ))}
-
-        {submitError && <div className="text-red-500 mt-4">{submitError}</div>}
-
-        {submitSuccess ? (
-          <div className="text-green-500 mt-4">
-            Form submitted successfully!
-          </div>
-        ) : (
-          <div className="flex justify-between mt-4">
-            <Button onClick={() => setStep(1)} className="text-white">
-              Edit Submission
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              className="text-white"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Submit"}
-            </Button>
-          </div>
-        )}
+        <div className="flex justify-between mt-4">
+          <Button onClick={() => setStep(1)} className="text-white">
+            Edit Submission
+          </Button>
+          <Button onClick={() => handleSubmit(formData)} className="text-white">
+            Submit
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
