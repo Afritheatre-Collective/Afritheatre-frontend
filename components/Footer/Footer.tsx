@@ -114,7 +114,7 @@ const Footer = () => {
                 href="/eea-summit"
                 className="text-gray-300 hover:text-white transition-colors"
               >
-                EEA Summit
+                Events
               </a>
             </li>
             <li>
@@ -122,7 +122,7 @@ const Footer = () => {
                 href="/vye-scenario"
                 className="text-gray-300 hover:text-white transition-colors"
               >
-                VYE Scenario
+                About
               </a>
             </li>
           </ul>

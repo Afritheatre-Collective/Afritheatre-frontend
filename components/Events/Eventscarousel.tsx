@@ -11,47 +11,46 @@ import Autoplay from "embla-carousel-autoplay";
 import EventCard from "./EventCard"; // Import your EventCard component
 
 const EventsCarousel = () => {
-  // Sample event data
   const events = [
     {
       id: 1,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test7.jpeg",
       imageAlt: "Tech conference",
       eventTitle: "Annual Tech Conference",
     },
     {
       id: 2,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test9.jpeg",
       imageAlt: "Music festival",
       eventTitle: "Summer Music Festival",
     },
     {
       id: 3,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test2.jpeg",
       imageAlt: "Art exhibition",
       eventTitle: "Modern Art Exhibition",
     },
     {
       id: 4,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test3.jpeg",
       imageAlt: "Food fair",
       eventTitle: "International Food Fair",
     },
     {
       id: 5,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test4.jpeg",
       imageAlt: "Sports tournament",
       eventTitle: "Community Sports Tournament",
     },
     {
       id: 6,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test5.jpeg",
       imageAlt: "Book fair",
       eventTitle: "Literary Book Fair",
     },
     {
       id: 7,
-      imageUrl: "/test-poster.jpeg",
+      imageUrl: "/events/test6.jpeg",
       imageAlt: "Film premiere",
       eventTitle: "Independent Film Premiere",
     },

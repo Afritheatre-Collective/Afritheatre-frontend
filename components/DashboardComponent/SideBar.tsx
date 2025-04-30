@@ -1,35 +1,45 @@
 "use client";
-import React, { useState, ReactNode } from "react"; // Import ReactNode
-import { FaHome, FaUser, FaClipboardList } from "react-icons/fa";
+import React, { useState, ReactNode } from "react";
+import {
+  FaHome,
+  FaUser,
+  FaClipboardList,
+  FaBuilding,
+  FaChartBar,
+  FaBlog,
+} from "react-icons/fa";
 
 // Define the type for the selected menu items
 type MenuItem = {
   name: string;
-  icon: ReactNode; // Use ReactNode instead of JSX.Element
-  id: "overview" | "users" | "theatre-data"; // Restrict 'id' to specific values
+  icon: ReactNode;
+  id: "overview" | "users" | "theatre-data" | "venues" | "reports" | "blogs";
 };
 
 // Define the type for the props passed to Sidebar
 type SidebarProps = {
-  setSelected: (id: "overview" | "users" | "theatre-data") => void;
+  setSelected: (
+    id: "overview" | "users" | "theatre-data" | "venues" | "reports" | "blogs"
+  ) => void;
 };
 
 const SideBar = ({ setSelected }: SidebarProps) => {
   const [activeItem, setActiveItem] = useState<
-    "overview" | "users" | "theatre-data"
+    "overview" | "users" | "theatre-data" | "venues" | "reports" | "blogs"
   >("overview");
 
   const menuItems: MenuItem[] = [
     { name: "Overview", icon: <FaHome />, id: "overview" },
     { name: "Users", icon: <FaUser />, id: "users" },
-    {
-      name: "Theatre Data",
-      icon: <FaClipboardList />,
-      id: "theatre-data",
-    },
+    { name: "Theatre Data", icon: <FaClipboardList />, id: "theatre-data" },
+    { name: "Venues", icon: <FaBuilding />, id: "venues" },
+    { name: "Reports", icon: <FaChartBar />, id: "reports" },
+    { name: "Blogs", icon: <FaBlog />, id: "blogs" },
   ];
 
-  const handleItemClick = (id: "overview" | "users" | "theatre-data") => {
+  const handleItemClick = (
+    id: "overview" | "users" | "theatre-data" | "venues" | "reports" | "blogs"
+  ) => {
     setActiveItem(id);
     setSelected(id);
   };
