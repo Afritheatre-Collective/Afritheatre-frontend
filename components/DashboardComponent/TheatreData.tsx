@@ -1,6 +1,23 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface TheatreActivity {
   _id: string;
@@ -42,8 +59,14 @@ interface TheatreActivity {
 
 const TheatreData = () => {
   const [activities, setActivities] = useState<TheatreActivity[]>([]);
+  const [filteredActivities, setFilteredActivities] = useState<
+    TheatreActivity[]
+  >([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedActivity, setSelectedActivity] =
+    useState<TheatreActivity | null>(null);
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -54,6 +77,7 @@ const TheatreData = () => {
         if (!res.ok) throw new Error(data.message || "Failed to fetch data");
 
         setActivities(data.data || []);
+        setFilteredActivities(data.data || []);
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err.message);
@@ -68,163 +92,176 @@ const TheatreData = () => {
     fetchActivities();
   }, []);
 
+  useEffect(() => {
+    const results = activities.filter(
+      (activity) =>
+        activity.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        activity.contactPerson
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (activity.venue &&
+          activity.venue.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (activity.county &&
+          activity.county.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredActivities(results);
+  }, [searchTerm, activities]);
+
   if (loading) return <div className="p-4">Loading theatre data...</div>;
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Theatre Activities</h1>
-      {activities.length === 0 ? (
-        <p>No theatre activity data available.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {activities.map((activity) => (
-            <div key={activity._id} className="border rounded-lg p-4 shadow">
-              <h2 className="text-xl font-semibold">{activity.eventName}</h2>
-              <p>
-                <strong>Company:</strong> {activity.companyName}
-              </p>
-              <p>
-                <strong>Contact:</strong> {activity.contactPerson}
-              </p>
-              {activity.month && (
-                <p>
-                  <strong>Month:</strong> {activity.month}
-                </p>
-              )}
-              {activity.week && (
-                <p>
-                  <strong>Week:</strong> {activity.week}
-                </p>
-              )}
-              {activity.date && (
-                <p>
-                  <strong>Date:</strong> {activity.date}
-                </p>
-              )}
-              {activity.year && (
-                <p>
-                  <strong>Year:</strong> {activity.year}
-                </p>
-              )}
-              {activity.time && (
-                <p>
-                  <strong>Time:</strong> {activity.time}
-                </p>
-              )}
-              {activity.sector && (
-                <p>
-                  <strong>Sector:</strong> {activity.sector}
-                </p>
-              )}
-              {activity.companyStatus && (
-                <p>
-                  <strong>Company Status:</strong> {activity.companyStatus}
-                </p>
-              )}
-              {activity.activityType && (
-                <p>
-                  <strong>Activity Type:</strong> {activity.activityType}
-                </p>
-              )}
-              {activity.nature && (
-                <p>
-                  <strong>Nature:</strong> {activity.nature}
-                </p>
-              )}
-              {activity.county && (
-                <p>
-                  <strong>County:</strong> {activity.county}
-                </p>
-              )}
-              {activity.venue && (
-                <p>
-                  <strong>Venue:</strong> {activity.venue}
-                </p>
-              )}
-              {activity.newVenue && (
-                <p>
-                  <strong>New Venue:</strong> {activity.newVenue}
-                </p>
-              )}
-              {activity.totalSessions && (
-                <p>
-                  <strong>Total Sessions:</strong> {activity.totalSessions}
-                </p>
-              )}
-              {activity.jobsCreated && (
-                <p>
-                  <strong>Jobs Created:</strong> {activity.jobsCreated}
-                </p>
-              )}
-              {activity.indirectJobs && (
-                <p>
-                  <strong>Indirect Jobs:</strong> {activity.indirectJobs}
-                </p>
-              )}
-              {activity.directJobs && (
-                <p>
-                  <strong>Direct Jobs:</strong> {activity.directJobs}
-                </p>
-              )}
-              {activity.entryType && (
-                <p>
-                  <strong>Entry Type:</strong> {activity.entryType}
-                </p>
-              )}
-              {activity.bookingPlatform && (
-                <p>
-                  <strong>Booking Platform:</strong> {activity.bookingPlatform}
-                </p>
-              )}
-              {activity.newBookingPlatform && (
-                <p>
-                  <strong>New Booking Platform:</strong>{" "}
-                  {activity.newBookingPlatform}
-                </p>
-              )}
-              {activity.paymentMethods &&
-                activity.paymentMethods.length > 0 && (
-                  <p>
-                    <strong>Payment Methods:</strong>{" "}
-                    {activity.paymentMethods.join(", ")}
-                  </p>
-                )}
-              {activity.language && (
-                <p>
-                  <strong>Language:</strong> {activity.language}
-                </p>
-              )}
-              {activity.otherLanguage && (
-                <p>
-                  <strong>Other Language:</strong> {activity.otherLanguage}
-                </p>
-              )}
-              {activity.email && (
-                <p>
-                  <strong>Email:</strong> {activity.email}
-                </p>
-              )}
-              {activity.phone && (
-                <p>
-                  <strong>Phone:</strong> {activity.phone}
-                </p>
-              )}
-              {activity.notes && (
-                <p>
-                  <strong>Notes:</strong> {activity.notes}
-                </p>
-              )}
-              {activity.createdAt && (
-                <p className="text-sm text-gray-500 mt-2">
-                  Created on:{" "}
-                  {new Date(activity.createdAt).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="p-4 space-y-4">
+      <h1 className="text-2xl font-bold">Theatre Activities</h1>
+
+      <div className="flex justify-between items-center">
+        <Input
+          type="text"
+          placeholder="Search activities..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Company Name</TableHead>
+              <TableHead>Contact Person</TableHead>
+              <TableHead>Venue</TableHead>
+              <TableHead>County</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredActivities.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center">
+                  No theatre activities found
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredActivities.map((activity) => (
+                <TableRow key={activity._id}>
+                  <TableCell className="font-medium">
+                    {activity.companyName}
+                  </TableCell>
+                  <TableCell>{activity.contactPerson}</TableCell>
+                  <TableCell>{activity.venue || "-"}</TableCell>
+                  <TableCell>{activity.county || "-"}</TableCell>
+                  <TableCell>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          className="text-white"
+                          size="sm"
+                          onClick={() => setSelectedActivity(activity)}
+                        >
+                          View Details
+                        </Button>
+                      </DialogTrigger>
+                      {selectedActivity && (
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle>Activity Details</DialogTitle>
+                          </DialogHeader>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <h3 className="font-semibold">
+                                Event Information
+                              </h3>
+                              <p>Event Name: {selectedActivity.eventName}</p>
+                              {selectedActivity.date && (
+                                <p>Date: {selectedActivity.date}</p>
+                              )}
+                              {selectedActivity.time && (
+                                <p>Time: {selectedActivity.time}</p>
+                              )}
+                              {selectedActivity.sector && (
+                                <p>Sector: {selectedActivity.sector}</p>
+                              )}
+                              {selectedActivity.activityType && (
+                                <p>
+                                  Activity Type: {selectedActivity.activityType}
+                                </p>
+                              )}
+                              {selectedActivity.nature && (
+                                <p>Nature: {selectedActivity.nature}</p>
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">
+                                Company Information
+                              </h3>
+                              <p>Company: {selectedActivity.companyName}</p>
+                              {selectedActivity.companyStatus && (
+                                <p>Status: {selectedActivity.companyStatus}</p>
+                              )}
+                              {selectedActivity.contactPerson && (
+                                <p>Contact: {selectedActivity.contactPerson}</p>
+                              )}
+                              {selectedActivity.email && (
+                                <p>Email: {selectedActivity.email}</p>
+                              )}
+                              {selectedActivity.phone && (
+                                <p>Phone: {selectedActivity.phone}</p>
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">
+                                Location Details
+                              </h3>
+                              {selectedActivity.county && (
+                                <p>County: {selectedActivity.county}</p>
+                              )}
+                              {selectedActivity.venue && (
+                                <p>Venue: {selectedActivity.venue}</p>
+                              )}
+                              {selectedActivity.newVenue && (
+                                <p>New Venue: {selectedActivity.newVenue}</p>
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">
+                                Other Information
+                              </h3>
+                              {selectedActivity.totalSessions && (
+                                <p>
+                                  Total Sessions:{" "}
+                                  {selectedActivity.totalSessions}
+                                </p>
+                              )}
+                              {selectedActivity.jobsCreated && (
+                                <p>
+                                  Jobs Created: {selectedActivity.jobsCreated}
+                                </p>
+                              )}
+                              {selectedActivity.entryType && (
+                                <p>Entry Type: {selectedActivity.entryType}</p>
+                              )}
+                              {selectedActivity.paymentMethods && (
+                                <p>
+                                  Payment Methods:{" "}
+                                  {selectedActivity.paymentMethods.join(", ")}
+                                </p>
+                              )}
+                              {selectedActivity.notes && (
+                                <p>Notes: {selectedActivity.notes}</p>
+                              )}
+                            </div>
+                          </div>
+                        </DialogContent>
+                      )}
+                    </Dialog>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };

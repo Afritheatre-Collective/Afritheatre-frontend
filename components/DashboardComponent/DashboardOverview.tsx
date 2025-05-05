@@ -20,9 +20,8 @@ interface TheatreActivity {
   bookingPlatform?: string;
   directJobs?: string;
   indirectJobs?: string;
-  eventName: string; // Added missing property
-  createdAt?: string; // Added missing property
-  // ... other fields you might need
+  eventName: string;
+  createdAt?: string;
 }
 
 interface User {
@@ -32,9 +31,20 @@ interface User {
   createdAt: string;
 }
 
+interface Venue {
+  _id: string;
+  county: string;
+  subCounty?: string;
+  area?: string;
+  name: string;
+  capacity: number;
+  mapLink?: string;
+}
+
 const DashboardOverview = () => {
   const [theatreData, setTheatreData] = useState<TheatreActivity[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,24 +52,35 @@ const DashboardOverview = () => {
     const fetchData = async () => {
       try {
         // Fetch theatre data
-        const theatreRes = await fetch(
-          "http://localhost:5000/api/theatre-activities"
-        );
+        const [theatreRes, usersRes, venuesRes] = await Promise.all([
+          fetch("http://localhost:5000/api/theatre-activities"),
+          fetch("http://localhost:5000/api/auth/users"),
+          fetch("http://localhost:5000/api/venues"),
+        ]);
+
+        // Handle theatre data response
         const theatreJson = await theatreRes.json();
-        if (!theatreRes.ok)
+        if (!theatreRes.ok) {
           throw new Error(
             theatreJson.message || "Failed to fetch theatre data"
           );
+        }
         setTheatreData(theatreJson.data || []);
 
-        // Fetch users data
-        const usersRes = await fetch("http://localhost:5000/api/auth/users");
+        // Handle users data response
         const usersJson = await usersRes.json();
-        if (!usersRes.ok)
+        if (!usersRes.ok) {
           throw new Error(usersJson.message || "Failed to fetch users");
+        }
         setUsers(usersJson);
+
+        // Handle venues data response
+        const venuesJson = await venuesRes.json();
+        if (!venuesRes.ok) {
+          throw new Error(venuesJson.message || "Failed to fetch venues");
+        }
+        setVenues(Array.isArray(venuesJson) ? venuesJson : []);
       } catch (err: unknown) {
-        // Changed from any to unknown
         setError(
           err instanceof Error
             ? err.message
@@ -86,55 +107,31 @@ const DashboardOverview = () => {
     (sum, item) => sum + (parseInt(item.jobsCreated || "0") || 0),
     0
   );
-  const totalDirectJobs = theatreData.reduce(
-    (sum, item) => sum + (parseInt(item.directJobs || "0") || 0),
-    0
-  );
-  const totalIndirectJobs = theatreData.reduce(
-    (sum, item) => sum + (parseInt(item.indirectJobs || "0") || 0),
-    0
-  );
   const totalUsers = users.length;
+  const totalVenues = venues.length;
+  const totalEvents = theatreData.length;
 
-  // Prepare data for charts
-  const companiesByCounty = theatreData.reduce((acc, item) => {
-    if (!item.county) return acc;
-    acc[item.county] = (acc[item.county] || 0) + 1;
+  // Mock data for blogs and reports (replace with actual API calls if available)
+  const totalBlogs = 24;
+  const totalReports = 15;
+
+  // Prepare data for user registration chart
+  const userRegistrationData = users.reduce((acc, user) => {
+    const date = new Date(user.createdAt).toLocaleDateString();
+    acc[date] = (acc[date] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const countyChartData = Object.entries(companiesByCounty).map(
-    ([county, count]) => ({
-      name: county,
-      companies: count,
-    })
-  );
-
-  const bookingPlatforms = theatreData.reduce((acc, item) => {
-    if (!item.bookingPlatform) return acc;
-    acc[item.bookingPlatform] = (acc[item.bookingPlatform] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const platformChartData = Object.entries(bookingPlatforms).map(
-    ([platform, count]) => ({
-      name: platform,
-      count,
-    })
-  );
-
-  // Get recent activities
-  const recentActivities = [...theatreData]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt || 0).getTime() -
-        new Date(a.createdAt || 0).getTime()
-    )
-    .slice(0, 5);
+  const userChartData = Object.entries(userRegistrationData)
+    .map(([date, count]) => ({
+      date,
+      users: count,
+    }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <div className="p-4 space-y-6">
-      {/* Summary Cards */}
+      {/* Summary Cards - First Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
@@ -147,7 +144,7 @@ const DashboardOverview = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>Counties Covered</CardTitle>
+            <CardTitle>Counties Registered</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{uniqueCounties}</div>
@@ -160,9 +157,6 @@ const DashboardOverview = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{totalJobs}</div>
-            <div className="text-sm text-gray-500">
-              Direct: {totalDirectJobs} | Indirect: {totalIndirectJobs}
-            </div>
           </CardContent>
         </Card>
 
@@ -176,79 +170,62 @@ const DashboardOverview = () => {
         </Card>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Summary Cards - Second Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader>
-            <CardTitle>Companies by County</CardTitle>
+            <CardTitle>Blog Posts</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={countyChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="companies" fill="#247373" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <div className="text-3xl font-bold">{totalBlogs}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Booking Platforms</CardTitle>
+            <CardTitle>Reports Generated</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={platformChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="count" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <div className="text-3xl font-bold">{totalReports}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Events Data Collected</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalEvents}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Venues Registered</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{totalVenues}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Activities */}
+      {/* User Registration Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Theatre Activities</CardTitle>
+          <CardTitle>User Registrations Over Time</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentActivities.map((activity) => (
-              <div key={activity._id} className="border-b pb-4 last:border-b-0">
-                <h3 className="font-medium">{activity.eventName}</h3>
-                <div className="text-sm text-gray-600">
-                  {activity.companyName} •{" "}
-                  {activity.county || "No county specified"}
-                </div>
-                <div className="text-sm">
-                  {activity.jobsCreated
-                    ? `${activity.jobsCreated} jobs created`
-                    : "No jobs data"}{" "}
-                  •
-                  {activity.bookingPlatform
-                    ? ` Booked via ${activity.bookingPlatform}`
-                    : " No booking platform"}
-                </div>
-                {activity.createdAt && (
-                  <div className="text-xs text-gray-500">
-                    Added on {new Date(activity.createdAt).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={userChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="users" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
