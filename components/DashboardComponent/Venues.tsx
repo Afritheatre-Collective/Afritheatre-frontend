@@ -16,6 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Pencil, Trash2 } from "lucide-react";
 
 interface Venue {
   _id: string;
@@ -37,6 +45,8 @@ const Venues = () => {
     direction: "ascending" | "descending";
   } | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -95,6 +105,42 @@ const Venues = () => {
       return 0;
     });
     setFilteredVenues(sortedVenues);
+  };
+
+  const handleViewMore = (venue: Venue) => {
+    setSelectedVenue(venue);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedVenue) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/venues/${selectedVenue._id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.ok) {
+        setVenues(venues.filter((venue) => venue._id !== selectedVenue._id));
+        setFilteredVenues(
+          filteredVenues.filter((venue) => venue._id !== selectedVenue._id)
+        );
+        setIsModalOpen(false);
+      } else {
+        console.error("Failed to delete venue");
+      }
+    } catch (err) {
+      console.error("Error deleting venue:", err);
+    }
+  };
+
+  const handleEdit = () => {
+    // Implement your edit logic here
+    console.log("Edit venue:", selectedVenue);
+    // You might want to open another modal or navigate to an edit page
   };
 
   if (loading) return <div className="p-4">Loading venues...</div>;
@@ -170,6 +216,7 @@ const Venues = () => {
                 {sortConfig?.key === "capacity" &&
                   (sortConfig.direction === "ascending" ? "↑" : "↓")}
               </TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -179,6 +226,15 @@ const Venues = () => {
                 <TableCell>{venue.county}</TableCell>
                 <TableCell>{venue.subCounty || "-"}</TableCell>
                 <TableCell>{venue.capacity.toLocaleString()}</TableCell>
+                <TableCell>
+                  <Button
+                    className="text-white"
+                    size="sm"
+                    onClick={() => handleViewMore(venue)}
+                  >
+                    View More
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -190,6 +246,70 @@ const Venues = () => {
         Showing {Math.min(itemsPerPage, filteredVenues.length)} of{" "}
         {filteredVenues.length} venues
       </div>
+
+      {/* Venue Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Venue Details</DialogTitle>
+          </DialogHeader>
+          {selectedVenue && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">Name</h4>
+                  <p>{selectedVenue.name}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">County</h4>
+                  <p>{selectedVenue.county}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Sub-County
+                  </h4>
+                  <p>{selectedVenue.subCounty || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">Area</h4>
+                  <p>{selectedVenue.area || "-"}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Capacity
+                  </h4>
+                  <p>{selectedVenue.capacity.toLocaleString()}</p>
+                </div>
+                {selectedVenue.mapLink && (
+                  <div className="col-span-2">
+                    <h4 className="text-sm font-medium text-gray-500">
+                      Map Link
+                    </h4>
+                    <a
+                      href={selectedVenue.mapLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      View on Map
+                    </a>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button className="text-white" onClick={handleEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+                <Button variant="destructive" onClick={handleDelete}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

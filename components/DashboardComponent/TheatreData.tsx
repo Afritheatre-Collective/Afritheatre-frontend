@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Pencil, Trash2 } from "lucide-react";
 
 interface TheatreActivity {
   _id: string;
@@ -107,8 +108,47 @@ const TheatreData = () => {
     setFilteredActivities(results);
   }, [searchTerm, activities]);
 
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/theatre-activities/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to delete activity");
+
+      // Remove the deleted activity from state
+      setActivities(activities.filter((activity) => activity._id !== id));
+      setFilteredActivities(
+        filteredActivities.filter((activity) => activity._id !== id)
+      );
+
+      // Close the dialog if the deleted activity was the one being viewed
+      if (selectedActivity?._id === id) {
+        setSelectedActivity(null);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to delete activity"
+      );
+    }
+  };
+
   if (loading) return <div className="p-4">Loading theatre data...</div>;
   if (error) return <div className="p-4 text-red-600">Error: {error}</div>;
+
+  const handleEdit = () => {
+    if (!selectedActivity) return;
+
+    // Example: Redirect to an edit page or open an edit form
+    console.log("Editing activity:", selectedActivity);
+
+    // You can implement navigation to an edit page or show an edit form dialog
+    // For example, if using a router:
+    // router.push(`/edit-activity/${selectedActivity._id}`);
+  };
 
   return (
     <div className="p-4 space-y-4">
@@ -251,6 +291,19 @@ const TheatreData = () => {
                                 <p>Notes: {selectedActivity.notes}</p>
                               )}
                             </div>
+                          </div>
+                          <div className="flex justify-end gap-2 pt-4">
+                            <Button className="text-white" onClick={handleEdit}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              onClick={() => handleDelete(activity._id)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </Button>
                           </div>
                         </DialogContent>
                       )}

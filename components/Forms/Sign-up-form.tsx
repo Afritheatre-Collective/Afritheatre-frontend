@@ -23,6 +23,7 @@ const SignupForm = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    phone: "",
   });
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,6 +66,7 @@ const SignupForm = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          phone: formData.phone,
         }),
       });
 
@@ -73,7 +75,13 @@ const SignupForm = () => {
         toast.success("Registration successful!", {
           position: "bottom-right",
         });
-        setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          password: "",
+          confirmPassword: "",
+        });
         // Redirect to login page after successful registration
         router.push("/login");
       } else {
@@ -121,6 +129,18 @@ const SignupForm = () => {
                 id="email"
                 type="email"
                 value={formData.email}
+                onChange={handleChange}
+                className="border-0 border-b rounded-none px-0 focus-visible:ring-0 focus-visible:border-b-primary"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
                 onChange={handleChange}
                 className="border-0 border-b rounded-none px-0 focus-visible:ring-0 focus-visible:border-b-primary"
                 required
