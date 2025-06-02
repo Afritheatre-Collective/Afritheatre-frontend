@@ -32,7 +32,6 @@ const SigninForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic client-side validation
     if (!formData.email || !formData.password) {
       toast.error("Email and password are required", {
         position: "bottom-right",
@@ -49,10 +48,7 @@ const SigninForm = () => {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await res.json();
@@ -61,8 +57,16 @@ const SigninForm = () => {
         throw new Error(data.message || "Login failed");
       }
 
+      localStorage.setItem("token", data.token);
+
       toast.success("Login successful!", { position: "bottom-right" });
-      router.push("/");
+
+      // Redirect based on role
+      if (data.user?.role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/");
+      }
     } catch (err) {
       console.error("Login error:", err);
       toast.error(err instanceof Error ? err.message : "Server error", {

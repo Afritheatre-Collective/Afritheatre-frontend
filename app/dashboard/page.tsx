@@ -1,7 +1,9 @@
 "use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Dashboard from "@/components/Dashboard/Dashboard";
 import SideBar from "@/components/DashboardComponent/SideBar";
-import React, { useState } from "react";
 
 // Define the allowed values for the 'selected' state
 type SelectedMenu =
@@ -13,8 +15,22 @@ type SelectedMenu =
   | "blogs";
 
 const Page = () => {
-  // Set the initial state with one of the valid menu options
   const [selected, setSelected] = useState<SelectedMenu>("overview");
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    const token = localStorage.getItem("token");
+
+    if (token && userRole === "admin") {
+      setIsAuthorized(true);
+    } else {
+      router.push("/");
+    }
+  }, [router]);
+
+  if (!isAuthorized) return null;
 
   return (
     <div className="bg-gray-100">
