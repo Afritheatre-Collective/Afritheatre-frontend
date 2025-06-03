@@ -24,6 +24,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Pencil, Trash2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Switch } from "../ui/switch";
 
 interface Venue {
   _id: string;
@@ -33,6 +35,17 @@ interface Venue {
   name: string;
   capacity: number;
   mapLink?: string;
+  isPublic: boolean;
+}
+
+interface VenueFormData {
+  county: string;
+  subCounty?: string;
+  area?: string;
+  name: string;
+  capacity: number;
+  mapLink?: string;
+  isPublic?: boolean;
 }
 
 const Venues = () => {
@@ -47,6 +60,14 @@ const Venues = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<VenueFormData>();
 
   useEffect(() => {
     const fetchVenues = async () => {
@@ -109,6 +130,7 @@ const Venues = () => {
 
   const handleViewMore = (venue: Venue) => {
     setSelectedVenue(venue);
+    setIsEditMode(false);
     setIsModalOpen(true);
   };
 
@@ -138,17 +160,96 @@ const Venues = () => {
   };
 
   const handleEdit = () => {
-    // Implement your edit logic here
-    console.log("Edit venue:", selectedVenue);
-    // You might want to open another modal or navigate to an edit page
+    if (!selectedVenue) return;
+    reset({
+      county: selectedVenue.county,
+      subCounty: selectedVenue.subCounty,
+      area: selectedVenue.area,
+      name: selectedVenue.name,
+      capacity: selectedVenue.capacity,
+      mapLink: selectedVenue.mapLink,
+    });
+    setIsEditMode(true);
+  };
+
+  const onSubmit = async (data: VenueFormData) => {
+    if (!selectedVenue) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/venues/${selectedVenue._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (response.ok) {
+        const updatedVenue = await response.json();
+        setVenues(
+          venues.map((venue) =>
+            venue._id === selectedVenue._id ? updatedVenue.venue : venue
+          )
+        );
+        setFilteredVenues(
+          filteredVenues.map((venue) =>
+            venue._id === selectedVenue._id ? updatedVenue.venue : venue
+          )
+        );
+        setSelectedVenue(updatedVenue.venue);
+        setIsEditMode(false);
+      } else {
+        console.error("Failed to update venue");
+      }
+    } catch (err) {
+      console.error("Error updating venue:", err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+  };
+
+  const togglePublicStatus = async (venueId: string, isPublic: boolean) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/venues/${venueId}/visibility`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ isPublic }),
+        }
+      );
+
+      if (response.ok) {
+        const updatedVenue = await response.json();
+        setVenues(
+          venues.map((venue) =>
+            venue._id === venueId ? updatedVenue.venue : venue
+          )
+        );
+        setFilteredVenues(
+          filteredVenues.map((venue) =>
+            venue._id === venueId ? updatedVenue.venue : venue
+          )
+        );
+      } else {
+        console.error("Failed to update venue visibility");
+      }
+    } catch (err) {
+      console.error("Error updating venue visibility:", err);
+    }
   };
 
   if (loading) return <div className="p-4">Loading venues...</div>;
 
   return (
     <div className="p-4 space-y-4">
-      <h2 className="text-2xl font-bold">Venue Management</h2>
-
       {/* Search and items per page controls */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <Input
@@ -235,6 +336,16 @@ const Venues = () => {
                     View More
                   </Button>
                 </TableCell>
+                <TableCell>
+                  <div className="flex items-center justify-end">
+                    <Switch
+                      checked={venue.isPublic}
+                      onCheckedChange={(isPublic) =>
+                        togglePublicStatus(venue._id, isPublic)
+                      }
+                    />
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -251,62 +362,160 @@ const Venues = () => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Venue Details</DialogTitle>
+            <DialogTitle>
+              {isEditMode ? "Edit Venue" : "Venue Details"}
+            </DialogTitle>
           </DialogHeader>
           {selectedVenue && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Name</h4>
-                  <p>{selectedVenue.name}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">County</h4>
-                  <p>{selectedVenue.county}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Sub-County
-                  </h4>
-                  <p>{selectedVenue.subCounty || "-"}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Area</h4>
-                  <p>{selectedVenue.area || "-"}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Capacity
-                  </h4>
-                  <p>{selectedVenue.capacity.toLocaleString()}</p>
-                </div>
-                {selectedVenue.mapLink && (
-                  <div className="col-span-2">
-                    <h4 className="text-sm font-medium text-gray-500">
-                      Map Link
-                    </h4>
-                    <a
-                      href={selectedVenue.mapLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
-                    >
-                      View on Map
-                    </a>
+            <>
+              {isEditMode ? (
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 block mb-1">
+                        Name*
+                      </label>
+                      <Input
+                        {...register("name", { required: "Name is required" })}
+                      />
+                      {errors.name && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.name.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 block mb-1">
+                        County*
+                      </label>
+                      <Input
+                        {...register("county", {
+                          required: "County is required",
+                        })}
+                      />
+                      {errors.county && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.county.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 block mb-1">
+                        Sub-County
+                      </label>
+                      <Input {...register("subCounty")} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 block mb-1">
+                        Area
+                      </label>
+                      <Input {...register("area")} />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 block mb-1">
+                        Capacity*
+                      </label>
+                      <Input
+                        type="number"
+                        {...register("capacity", {
+                          required: "Capacity is required",
+                          valueAsNumber: true,
+                        })}
+                      />
+                      {errors.capacity && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors.capacity.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 block mb-1">
+                        Map Link
+                      </label>
+                      <Input {...register("mapLink")} />
+                    </div>
                   </div>
-                )}
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <Button className="text-white" onClick={handleEdit}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Button>
-                <Button variant="destructive" onClick={handleDelete}>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </Button>
-              </div>
-            </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="isPublic"
+                        {...register("isPublic")}
+                        defaultChecked={selectedVenue.isPublic}
+                      />
+                      <label htmlFor="isPublic">Make this venue public</label>
+                    </div>
+                    <Button
+                      variant="outline"
+                      type="button"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit">Save Changes</Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">
+                        Name
+                      </h4>
+                      <p>{selectedVenue.name}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">
+                        County
+                      </h4>
+                      <p>{selectedVenue.county}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">
+                        Sub-County
+                      </h4>
+                      <p>{selectedVenue.subCounty || "-"}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">
+                        Area
+                      </h4>
+                      <p>{selectedVenue.area || "-"}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-500">
+                        Capacity
+                      </h4>
+                      <p>{selectedVenue.capacity.toLocaleString()}</p>
+                    </div>
+                    {selectedVenue.mapLink && (
+                      <div className="col-span-2">
+                        <h4 className="text-sm font-medium text-gray-500">
+                          Map Link
+                        </h4>
+                        <a
+                          href={selectedVenue.mapLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          View on Map
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button className="text-white" onClick={handleEdit}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Button>
+                    <Button variant="destructive" onClick={handleDelete}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </DialogContent>
       </Dialog>

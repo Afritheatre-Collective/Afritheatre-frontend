@@ -152,8 +152,6 @@ const TheatreData = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Theatre Activities</h1>
-
       <div className="flex justify-between items-center">
         <Input
           type="text"
