@@ -16,10 +16,13 @@ type SelectedMenu =
 
 const Page = () => {
   const [selected, setSelected] = useState<SelectedMenu>("overview");
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const router = useRouter();
 
-  useEffect(() => {
+  {
+    /* 
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const router = useRouter();
+    
+   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
     const token = localStorage.getItem("token");
 
@@ -30,7 +33,8 @@ const Page = () => {
     }
   }, [router]);
 
-  if (!isAuthorized) return null;
+  if (!isAuthorized) return null; */
+  }
 
   return (
     <div className="bg-gray-100">

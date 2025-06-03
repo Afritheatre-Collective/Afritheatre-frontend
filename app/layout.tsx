@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
-import MainHeader from "@/components/Headers/MainHeader";
 import InfoNav from "@/components/Headers/InfoNav";
 import FooterSection from "@/components/Footer/FooterSection";
 import { Toaster } from "@/components/ui/sonner";
+import Navbar from "@/components/Headers/Navbar";
 
 const roboto_mono = Roboto_Mono({
   subsets: ["latin"],
@@ -36,7 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${roboto_mono.className} antialiased`}>
         <InfoNav />
-        <MainHeader /> {children}
+        <Navbar /> {children}
         <Toaster position="bottom-right" />
         <FooterSection />
       </body>
