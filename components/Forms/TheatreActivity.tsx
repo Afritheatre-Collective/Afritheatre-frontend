@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { enUS } from "date-fns/locale";
+import { registerLocale } from "react-datepicker";
 import {
   Select,
   SelectTrigger,
@@ -19,11 +23,7 @@ import {
 const TheatreActivity = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    month: "",
-    week: "",
     date: "",
-    year: "",
-    time: "",
     companyName: "",
     sector: "",
     companyStatus: "",
@@ -49,6 +49,8 @@ const TheatreActivity = () => {
     notes: "",
   });
 
+  registerLocale("en", enUS);
+
   const handleChange = <K extends keyof FormData>(
     field: K,
     value: FormData[K]
@@ -57,11 +59,7 @@ const TheatreActivity = () => {
   };
 
   type FormData = {
-    month: string;
-    week: string;
     date: string;
-    year: string;
-    time: string;
     companyName: string;
     sector: string;
     companyStatus: string;
@@ -126,11 +124,7 @@ const TheatreActivity = () => {
 
       // Optional: Reset form after successful submission
       setFormData({
-        month: "",
-        week: "",
         date: "",
-        year: "",
-        time: "",
         companyName: "",
         sector: "",
         companyStatus: "",
@@ -188,31 +182,30 @@ const TheatreActivity = () => {
         <CardTitle>Section 1: Activity Basics</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
-        <Input
-          placeholder="Month"
-          value={formData.month}
-          onChange={(e) => handleChange("month", e.target.value)}
-        />
-        <Input
-          placeholder="Week"
-          value={formData.week}
-          onChange={(e) => handleChange("week", e.target.value)}
-        />
-        <Input
-          placeholder="Date"
-          value={formData.date}
-          onChange={(e) => handleChange("date", e.target.value)}
-        />
-        <Input
-          placeholder="Year"
-          value={formData.year}
-          onChange={(e) => handleChange("year", e.target.value)}
-        />
-        <Input
-          placeholder="Time"
-          value={formData.time}
-          onChange={(e) => handleChange("time", e.target.value)}
-        />
+        <div>
+          <Label className="font-bold">Activity Date and Time</Label>
+          <DatePicker
+            selected={formData.date ? new Date(formData.date) : null}
+            onChange={(date: Date | null) => {
+              if (date) {
+                handleChange("date", date.toISOString());
+              }
+            }}
+            minDate={new Date()}
+            showTimeSelect
+            timeFormat="HH:mm"
+            timeIntervals={15}
+            dateFormat="MMMM d, yyyy h:mm aa"
+            placeholderText="Select date and time"
+            className="flex h-10 w-full mt-5 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            locale="en"
+            timeCaption="Time"
+            shouldCloseOnSelect={false}
+            isClearable
+          />
+        </div>
+
+        <Label className="font-bold">Company Name</Label>
         <Input
           placeholder="Company Name"
           value={formData.companyName}
@@ -298,13 +291,14 @@ const TheatreActivity = () => {
             <Label htmlFor="infrequent-irregular">Infrequent-Irregular</Label>
           </div>
         </RadioGroup>
-
+        <Label className="font-bold">Event Name</Label>
         <Input
           placeholder="Event Name"
           value={formData.eventName}
           onChange={(e) => handleChange("eventName", e.target.value)}
         />
 
+        <Label className="font-bold">County</Label>
         <Input
           placeholder="County"
           value={formData.county}
@@ -312,7 +306,16 @@ const TheatreActivity = () => {
         />
 
         <Label>Select Venue</Label>
-        <Select onValueChange={(value) => handleChange("venue", value)}>
+        <Select
+          onValueChange={(value) => {
+            handleChange("venue", value);
+            // Clear newVenue when switching away from "other"
+            if (value !== "other") {
+              handleChange("newVenue", "");
+            }
+          }}
+          value={formData.venue}
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select Venue" />
           </SelectTrigger>
@@ -320,13 +323,20 @@ const TheatreActivity = () => {
             <SelectItem value="venue1">Venue 1</SelectItem>
             <SelectItem value="venue2">Venue 2</SelectItem>
             <SelectItem value="venue3">Venue 3</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
           </SelectContent>
         </Select>
-        <Input
-          placeholder="New Venue (if not listed)"
-          value={formData.newVenue}
-          onChange={(e) => handleChange("newVenue", e.target.value)}
-        />
+
+        {formData.venue === "other" && (
+          <div className="mt-2">
+            <Label>Specify Venue</Label>
+            <Input
+              placeholder="Enter venue name"
+              value={formData.newVenue}
+              onChange={(e) => handleChange("newVenue", e.target.value)}
+            />
+          </div>
+        )}
 
         <div className="flex justify-between mt-4">
           <Button onClick={() => setStep(1)} className="text-white">
@@ -382,7 +392,14 @@ const TheatreActivity = () => {
 
         <Label>Booking Platform</Label>
         <Select
-          onValueChange={(value) => handleChange("bookingPlatform", value)}
+          onValueChange={(value) => {
+            handleChange("bookingPlatform", value);
+            // Clear newBookingPlatform when switching away from "other"
+            if (value !== "other") {
+              handleChange("newBookingPlatform", "");
+            }
+          }}
+          value={formData.bookingPlatform}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select Booking Platform" />
@@ -391,13 +408,22 @@ const TheatreActivity = () => {
             <SelectItem value="platform1">Platform 1</SelectItem>
             <SelectItem value="platform2">Platform 2</SelectItem>
             <SelectItem value="platform3">Platform 3</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
           </SelectContent>
         </Select>
-        <Input
-          placeholder="New Booking Platform (if not listed)"
-          value={formData.newBookingPlatform}
-          onChange={(e) => handleChange("newBookingPlatform", e.target.value)}
-        />
+
+        {formData.bookingPlatform === "other" && (
+          <div className="mt-2">
+            <Label>Specify Booking Platform</Label>
+            <Input
+              placeholder="Enter booking platform name"
+              value={formData.newBookingPlatform}
+              onChange={(e) =>
+                handleChange("newBookingPlatform", e.target.value)
+              }
+            />
+          </div>
+        )}
 
         <div className="flex justify-between mt-4">
           <Button onClick={() => setStep(2)} className="text-white">

@@ -6,6 +6,7 @@ import InfoNav from "@/components/Headers/InfoNav";
 import FooterSection from "@/components/Footer/FooterSection";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Headers/Navbar";
+import { AuthProvider } from "@/context/authContext";
 
 const roboto_mono = Roboto_Mono({
   subsets: ["latin"],
@@ -35,10 +36,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${roboto_mono.className} antialiased`}>
-        <InfoNav />
-        <Navbar /> {children}
-        <Toaster position="bottom-right" />
-        <FooterSection />
+        <AuthProvider>
+          <InfoNav />
+          <Navbar /> {children}
+          <Toaster position="bottom-right" />
+          <FooterSection />
+        </AuthProvider>
       </body>
     </html>
   );

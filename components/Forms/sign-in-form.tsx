@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/authContext";
 
 const SigninForm = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ const SigninForm = () => {
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -57,7 +59,7 @@ const SigninForm = () => {
         throw new Error(data.message || "Login failed");
       }
 
-      localStorage.setItem("token", data.token);
+      login(data.token, data.user);
 
       toast.success("Login successful!", { position: "bottom-right" });
 
