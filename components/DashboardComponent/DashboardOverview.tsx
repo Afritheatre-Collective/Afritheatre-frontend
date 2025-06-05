@@ -115,10 +115,25 @@ const DashboardOverview = () => {
   const totalBlogs = 24;
   const totalReports = 15;
 
-  // Prepare data for user registration chart
+  // Prepare data for user registration chart - fixed version
   const userRegistrationData = users.reduce((acc, user) => {
-    const date = new Date(user.createdAt).toLocaleDateString();
-    acc[date] = (acc[date] || 0) + 1;
+    try {
+      // Parse the date string into a Date object first
+      const dateObj = new Date(user.createdAt);
+
+      // Check if the date is valid
+      if (isNaN(dateObj.getTime())) {
+        console.error("Invalid date:", user.createdAt);
+        return acc;
+      }
+
+      // Format the date consistently (e.g., YYYY-MM-DD)
+      const date = dateObj.toISOString().split("T")[0];
+
+      acc[date] = (acc[date] || 0) + 1;
+    } catch (error) {
+      console.error("Error processing date:", error);
+    }
     return acc;
   }, {} as Record<string, number>);
 

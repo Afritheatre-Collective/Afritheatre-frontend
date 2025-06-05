@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Roboto_Mono } from "next/font/google";
+import { IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import InfoNav from "@/components/Headers/InfoNav";
@@ -8,9 +8,11 @@ import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Headers/Navbar";
 import { AuthProvider } from "@/context/authContext";
 
-const roboto_mono = Roboto_Mono({
+const ibmPlexSerif = IBM_Plex_Serif({
   subsets: ["latin"],
-  variable: "--font-roboto-mono",
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-ibm-plex-serif",
   display: "swap",
 });
 
@@ -35,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${roboto_mono.className} antialiased`}>
+      <body className={`${ibmPlexSerif.className} antialiased`}>
         <AuthProvider>
           <InfoNav />
           <Navbar /> {children}

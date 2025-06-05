@@ -3,7 +3,7 @@ import VenuesForm from "../Forms/VenuesForm";
 
 const AddVenues = () => {
   return (
-    <div>
+    <div className=" my-14">
       <VenuesForm />
     </div>
   );

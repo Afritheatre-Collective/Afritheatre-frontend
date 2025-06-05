@@ -102,7 +102,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Avatar className="cursor-pointer">
+                <Avatar className="cursor-pointer h-12 w-12">
                   <AvatarImage src="" />
                   <AvatarFallback>
                     {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
@@ -110,15 +110,14 @@ export default function Navbar() {
                 </Avatar>
               </motion.div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem className="cursor-pointer">
-                <Link href="/profile">Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <Link href="/settings">Settings</Link>
+            <DropdownMenuContent align="end" className="w-48 py-2">
+              <DropdownMenuItem className="cursor-pointer w-full px-4 py-3">
+                <Link href="/user-dashboard" className="w-full">
+                  Dashboard
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="cursor-pointer text-red-600"
+                className="cursor-pointer text-red-600 w-full px-4 py-3"
                 onClick={handleLogout}
               >
                 Logout

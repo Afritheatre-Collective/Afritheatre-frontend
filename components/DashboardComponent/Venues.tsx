@@ -26,6 +26,7 @@ import {
 import { Pencil, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Switch } from "../ui/switch";
+import { useRouter } from "next/navigation";
 
 interface Venue {
   _id: string;
@@ -61,6 +62,7 @@ const Venues = () => {
   const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -252,13 +254,23 @@ const Venues = () => {
     <div className="p-4 space-y-4">
       {/* Search and items per page controls */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <Input
-          type="text"
-          placeholder="Search venues..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
+        <div className="flex flex-1 gap-2">
+          <Input
+            type="text"
+            placeholder="Search venues..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-md"
+          />
+          <Button
+            className="text-white"
+            onClick={() => {
+              router.push("/add-venue");
+            }}
+          >
+            Add Venue
+          </Button>
+        </div>
 
         <div className="flex items-center gap-2">
           <span>Show:</span>

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Dashboard from "@/components/Dashboard/Dashboard";
 import SideBar from "@/components/DashboardComponent/SideBar";
+import LoadingAnimation from "@/components/LoadingAnimation";
 
-// Define the allowed values for the 'selected' state
 type SelectedMenu =
   | "overview"
   | "users"
@@ -16,25 +16,62 @@ type SelectedMenu =
 
 const Page = () => {
   const [selected, setSelected] = useState<SelectedMenu>("overview");
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  {
-    /* 
-    const [isAuthorized, setIsAuthorized] = useState(false);
-    const router = useRouter();
-    
-   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
-    const token = localStorage.getItem("token");
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("No token found");
+        router.push("/");
+        return;
+      }
 
-    if (token && userRole === "admin") {
-      setIsAuthorized(true);
-    } else {
-      router.push("/");
-    }
+      try {
+        const res = await fetch("http://localhost:5000/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        console.log("Response status:", res.status);
+
+        if (!res.ok) {
+          const error = await res.json();
+          console.log("Auth failed:", error);
+          router.push("/");
+          return;
+        }
+
+        const user = await res.json();
+        console.log("User from /me:", user);
+
+        if (user.role === "admin") {
+          setIsAuthorized(true);
+        } else {
+          console.log("Not an admin:", user.role);
+          router.push("/");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to verify user:", err);
+        router.push("/");
+        return;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
-  if (!isAuthorized) return null; */
+  if (loading) {
+    return <LoadingAnimation />;
   }
+
+  if (!isAuthorized) return null;
 
   return (
     <div className="bg-gray-100">
