@@ -133,7 +133,7 @@ const SignupForm = () => {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  className="border rounded-lg pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-2 focus-visible:ring-primary"
+                  className="bg-slate-100 rounded-none border-x-0 border-t-0 border-b-2 pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-b-primary"
                   required
                 />
                 <FaUser className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -150,7 +150,7 @@ const SignupForm = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="border rounded-lg pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-2 focus-visible:ring-primary"
+                  className="bg-slate-100 rounded-none border-x-0 border-t-0 border-b-2 pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-b-primary"
                   required
                 />
                 <FaEnvelope className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -167,7 +167,7 @@ const SignupForm = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="border rounded-lg pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-2 focus-visible:ring-primary"
+                  className="bg-slate-100 rounded-none border-x-0 border-t-0 border-b-2 pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-b-primary"
                   required
                 />
                 <FaPhone className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -184,7 +184,7 @@ const SignupForm = () => {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
-                  className="border rounded-lg pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-2 focus-visible:ring-primary"
+                  className="bg-slate-100 rounded-none border-x-0 border-t-0 border-b-2 pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-b-primary"
                   required
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
@@ -214,7 +214,7 @@ const SignupForm = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="border rounded-lg pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-2 focus-visible:ring-primary"
+                  className="bg-slate-100 rounded-none border-x-0 border-t-0 border-b-2 pl-4 pr-10 py-5 text-sm md:text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-b-primary"
                   required
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
