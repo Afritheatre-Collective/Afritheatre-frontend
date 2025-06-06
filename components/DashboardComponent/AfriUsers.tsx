@@ -33,6 +33,7 @@ interface User {
 }
 
 const AfriUsers = () => {
+  // State
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,10 @@ const AfriUsers = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingData, setEditingData] = useState<Partial<User>>({});
 
+  // Fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -58,11 +62,10 @@ const AfriUsers = () => {
         setLoading(false);
       }
     };
-
     fetchUsers();
   }, []);
 
-  // Search function
+  // Search
   useEffect(() => {
     const results = users.filter(
       (user) =>
@@ -73,51 +76,74 @@ const AfriUsers = () => {
     setFilteredUsers(results);
   }, [searchTerm, users]);
 
-  // Sort function
+  // Sort
   const requestSort = (key: keyof User) => {
     let direction: "ascending" | "descending" = "ascending";
     if (
       sortConfig &&
       sortConfig.key === key &&
       sortConfig.direction === "ascending"
-    ) {
+    )
       direction = "descending";
-    }
-    setSortConfig({ key, direction });
 
-    const sortedUsers = [...filteredUsers].sort((a, b) => {
-      if (a[key] < b[key]) {
-        return direction === "ascending" ? -1 : 1;
-      }
-      if (a[key] > b[key]) {
-        return direction === "ascending" ? 1 : -1;
-      }
+    setSortConfig({ key, direction });
+    const sorted = [...filteredUsers].sort((a, b) => {
+      if (a[key] < b[key]) return direction === "ascending" ? -1 : 1;
+      if (a[key] > b[key]) return direction === "ascending" ? 1 : -1;
       return 0;
     });
-    setFilteredUsers(sortedUsers);
+    setFilteredUsers(sorted);
   };
 
-  const handleViewMore = (user: User) => {
+  // Open dialog
+  const openDialog = (user: User, edit = false) => {
     setSelectedUser(user);
+    setIsEditMode(edit);
+    setEditingData(edit ? user : {});
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (userId: string) => {
+  // Save edits
+  const handleSave = async () => {
+    if (!selectedUser) return;
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/auth/users/${userId}`,
+      const res = await fetch(
+        `http://localhost:5000/api/auth/users/${selectedUser._id}`,
         {
-          method: "DELETE",
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingData),
         }
       );
-
-      if (response.ok) {
-        setUsers(users.filter((user) => user._id !== userId));
-        setFilteredUsers(filteredUsers.filter((user) => user._id !== userId));
+      if (res.ok) {
+        const { user: updatedUser } = await res.json();
+        const updatedList = users.map((u) =>
+          u._id === updatedUser._id ? updatedUser : u
+        );
+        setUsers(updatedList);
+        setFilteredUsers(updatedList);
         setIsDialogOpen(false);
       } else {
-        console.error("Failed to delete user");
+        console.error("Failed to update user");
       }
+    } catch (err) {
+      console.error("Error updating user:", err);
+    }
+  };
+
+  // Delete user
+  const handleDelete = async (userId: string) => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/auth/users/${userId}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        const updated = users.filter((u) => u._id !== userId);
+        setUsers(updated);
+        setFilteredUsers(updated);
+        setIsDialogOpen(false);
+      } else console.error("Failed to delete user");
     } catch (err) {
       console.error("Error deleting user:", err);
     }
@@ -126,8 +152,8 @@ const AfriUsers = () => {
   if (loading) return <div>Loading users...</div>;
 
   return (
-    <div className=" p-4 space-y-4">
-      {/* Search and items per page controls */}
+    <div className="p-4 space-y-4">
+      {/* Search / items */}
       <div className="flex flex-col sm:flex-row justify-between gap-4">
         <Input
           type="text"
@@ -136,22 +162,21 @@ const AfriUsers = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md"
         />
-
         <div className="flex items-center gap-2">
           <span>Show:</span>
           <Select
             value={itemsPerPage.toString()}
-            onValueChange={(value) => setItemsPerPage(Number(value))}
+            onValueChange={(v) => setItemsPerPage(Number(v))}
           >
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Items" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
+              {[5, 10, 20, 50, 100].map((n) => (
+                <SelectItem key={n} value={n.toString()}>
+                  {n}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -162,30 +187,17 @@ const AfriUsers = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-100"
-                onClick={() => requestSort("name")}
-              >
-                Name{" "}
-                {sortConfig?.key === "name" &&
-                  (sortConfig.direction === "ascending" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-100"
-                onClick={() => requestSort("email")}
-              >
-                Email{" "}
-                {sortConfig?.key === "email" &&
-                  (sortConfig.direction === "ascending" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer hover:bg-gray-100"
-                onClick={() => requestSort("phone")}
-              >
-                Phone{" "}
-                {sortConfig?.key === "phone" &&
-                  (sortConfig.direction === "ascending" ? "↑" : "↓")}
-              </TableHead>
+              {["name", "email", "phone"].map((key) => (
+                <TableHead
+                  key={key}
+                  className="cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort(key as keyof User)}
+                >
+                  {key.charAt(0).toUpperCase() + key.slice(1)}{" "}
+                  {sortConfig?.key === key &&
+                    (sortConfig.direction === "ascending" ? "↑" : "↓")}
+                </TableHead>
+              ))}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -198,10 +210,9 @@ const AfriUsers = () => {
                 <TableCell>
                   <Button
                     className="text-white"
-                    size="sm"
-                    onClick={() => handleViewMore(user)}
+                    onClick={() => openDialog(user, false)}
                   >
-                    View more
+                    View
                   </Button>
                 </TableCell>
               </TableRow>
@@ -210,13 +221,12 @@ const AfriUsers = () => {
         </Table>
       </div>
 
-      {/* Pagination info */}
       <div className="text-sm text-gray-500">
         Showing {Math.min(itemsPerPage, filteredUsers.length)} of{" "}
         {filteredUsers.length} users
       </div>
 
-      {/* User Details Dialog */}
+      {/* Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -224,33 +234,66 @@ const AfriUsers = () => {
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
-              <div>
-                <h4 className="font-medium">Name</h4>
-                <p>{selectedUser.name}</p>
-              </div>
-              <div>
-                <h4 className="font-medium">Email</h4>
-                <p>{selectedUser.email}</p>
-              </div>
-              <div>
-                <h4 className="font-medium">Phone</h4>
-                <p>{selectedUser.phone}</p>
-              </div>
-              <div>
-                <h4 className="font-medium">Role</h4>
-                <p>{selectedUser.role}</p>
-              </div>
+              {isEditMode ? (
+                <>
+                  {(["name", "email", "phone", "role"] as (keyof User)[]).map(
+                    (field) => (
+                      <div key={field}>
+                        <h4 className="font-medium">
+                          {field.charAt(0).toUpperCase() + field.slice(1)}
+                        </h4>
+                        <Input
+                          value={editingData[field] as string}
+                          onChange={(e) =>
+                            setEditingData({
+                              ...editingData,
+                              [field]: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+                    )
+                  )}
+                </>
+              ) : (
+                <>
+                  <div>
+                    <h4 className="font-medium">Name</h4>
+                    <p>{selectedUser.name}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Email</h4>
+                    <p>{selectedUser.email}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Phone</h4>
+                    <p>{selectedUser.phone}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">Role</h4>
+                    <p>{selectedUser.role}</p>
+                  </div>
+                </>
+              )}
+
               <div className="flex justify-end gap-2 pt-4">
-                <Button className="text-white">
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Button>
+                {isEditMode ? (
+                  <Button className="text-white" onClick={handleSave}>
+                    Save
+                  </Button>
+                ) : (
+                  <Button
+                    className="text-white"
+                    onClick={() => openDialog(selectedUser, true)}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                  </Button>
+                )}
                 <Button
                   variant="destructive"
                   onClick={() => handleDelete(selectedUser._id)}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete
                 </Button>
               </div>
             </div>

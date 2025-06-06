@@ -330,6 +330,7 @@ const Venues = () => {
                   (sortConfig.direction === "ascending" ? "↑" : "↓")}
               </TableHead>
               <TableHead>Actions</TableHead>
+              <TableHead>Publish</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -355,6 +356,7 @@ const Venues = () => {
                       onCheckedChange={(isPublic) =>
                         togglePublicStatus(venue._id, isPublic)
                       }
+                      className="text-white"
                     />
                   </div>
                 </TableCell>

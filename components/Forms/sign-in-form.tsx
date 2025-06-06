@@ -87,8 +87,8 @@ const SigninForm = () => {
   };
 
   return (
-    <div className="h-full flex items-center justify-center backdrop-blur-lg px-4">
-      <Card className="w-full max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl p-4 my-10 sm:p-8">
+    <div className="h-full flex items-center justify-center backdrop-blur-lg">
+      <Card className="md:h-auto w-[80%] sm:w-[420px] p-4 my-10 sm:p-8">
         <CardHeader>
           <CardTitle className="text-center text-2xl md:text-3xl">
             Login

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Serif } from "next/font/google";
+import { Funnel_Display } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/config/site";
 import InfoNav from "@/components/Headers/InfoNav";
@@ -8,11 +8,11 @@ import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Headers/Navbar";
 import { AuthProvider } from "@/context/authContext";
 
-const ibmPlexSerif = IBM_Plex_Serif({
+const funnelDisplay = Funnel_Display({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-ibm-plex-serif",
+  weight: ["400", "500", "600", "700"], // Adjust weights as needed
+  style: ["normal"],
+  variable: "--font-funnel-display",
   display: "swap",
 });
 
@@ -37,7 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${ibmPlexSerif.className} antialiased`}>
+      <body className={`${funnelDisplay.className} antialiased`}>
         <AuthProvider>
           <InfoNav />
           <Navbar /> {children}
