@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import ImageUploadComponent from "./ImageUploadComponent";
 
 type VenueData = {
   county: string;
@@ -21,6 +22,7 @@ type VenueData = {
   name: string;
   capacity: string;
   mapLink: string;
+  imageUrl?: string;
 };
 
 const VenuesForm = () => {
@@ -31,12 +33,17 @@ const VenuesForm = () => {
     name: "",
     capacity: "",
     mapLink: "",
+    imageUrl: "",
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleImageUpload = (fileUrl: string) => {
+    setFormData({ ...formData, imageUrl: fileUrl });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,6 +86,7 @@ const VenuesForm = () => {
           name: formData.name.trim(),
           capacity: capacityNumber,
           mapLink: formData.mapLink.trim(),
+          imageUrl: formData.imageUrl?.trim(),
         }),
       });
 
@@ -100,12 +108,11 @@ const VenuesForm = () => {
         name: "",
         capacity: "",
         mapLink: "",
+        imageUrl: "",
       });
 
       // Optionally redirect to venues list
       router.push("/venues");
-      // Or refresh the page if needed
-      // router.refresh();
     } catch (error) {
       console.error("Error creating venue:", error);
       const errorMessage =
@@ -130,6 +137,14 @@ const VenuesForm = () => {
 
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <Label>Venue Image</Label>
+              <ImageUploadComponent
+                onUploadSuccess={handleImageUpload}
+                initialImageUrl={formData.imageUrl}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="county">County *</Label>
               <Input

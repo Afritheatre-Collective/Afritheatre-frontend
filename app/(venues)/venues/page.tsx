@@ -10,8 +10,10 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/components/ui/card";
 import { FaHouseUser, FaMapLocationDot } from "react-icons/fa6";
+import Image from "next/image";
 
 interface Venue {
   _id: string;
@@ -21,6 +23,7 @@ interface Venue {
   name: string;
   capacity: number;
   mapLink?: string;
+  imageUrl?: string;
 }
 
 type VenuesCardProps = {
@@ -30,6 +33,7 @@ type VenuesCardProps = {
   area?: string;
   capacity: number;
   mapLink?: string;
+  imageUrl?: string;
 };
 
 const VenuesCard = ({
@@ -39,35 +43,58 @@ const VenuesCard = ({
   area,
   capacity,
   mapLink,
+  imageUrl,
 }: VenuesCardProps) => {
   return (
-    <Card className="w-full overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow h-full">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">{name}</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-2">
-        <CardDescription className="flex items-center gap-2">
-          <FaMapLocationDot />
-          {county}
-          {subCounty && `, ${subCounty}`}
-          {area && `, ${area}`}
-        </CardDescription>
-        <CardDescription className="flex items-center gap-2">
-          <FaHouseUser />
-          Capacity: {capacity.toLocaleString()} people
-        </CardDescription>
-        {mapLink && (
-          <a
-            href={mapLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline flex items-center gap-2"
-          >
+    <Card className="w-full overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
+      {/* Image Section */}
+      {imageUrl ? (
+        <div className="relative h-48 w-full">
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        </div>
+      ) : (
+        <div className="h-48 w-full bg-gray-100 flex items-center justify-center">
+          <span className="text-gray-400">No image available</span>
+        </div>
+      )}
+
+      {/* Content Section */}
+      <div className="flex-1 flex flex-col">
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold">{name}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-2 flex-1">
+          <CardDescription className="flex items-center gap-2">
             <FaMapLocationDot />
-            View on Map
-          </a>
-        )}
-      </CardContent>
+            {county}
+            {subCounty && `, ${subCounty}`}
+            {area && `, ${area}`}
+          </CardDescription>
+          <CardDescription className="flex items-center gap-2">
+            <FaHouseUser />
+            Capacity: {capacity.toLocaleString()} people
+          </CardDescription>
+        </CardContent>
+        <CardFooter>
+          {mapLink && (
+            <a
+              href={mapLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline flex items-center gap-2 w-full"
+            >
+              <FaMapLocationDot />
+              View on Map
+            </a>
+          )}
+        </CardFooter>
+      </div>
     </Card>
   );
 };
@@ -160,6 +187,7 @@ const VenuesPage = () => {
               area={venue.area}
               capacity={venue.capacity}
               mapLink={venue.mapLink}
+              imageUrl={venue.imageUrl}
             />
           ))}
         </div>
