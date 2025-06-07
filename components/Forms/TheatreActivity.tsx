@@ -19,10 +19,41 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import FileUploadComponent from "./FileUploadComponent";
+
+// Renamed from FormData to TheatreFormData to avoid conflict
+type TheatreFormData = {
+  date: string;
+  companyName: string;
+  sector: string;
+  companyStatus: string;
+  activityType: string;
+  nature: string;
+  eventName: string;
+  county: string;
+  venue: string;
+  newVenue: string;
+  totalSessions: string;
+  jobsCreated: string;
+  indirectJobs: string;
+  directJobs: string;
+  entryType: string;
+  bookingPlatform: string;
+  newBookingPlatform: string;
+  paymentMethods: string[];
+  language: string;
+  otherLanguage: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  notes: string;
+  files: File[];
+  fileUrls?: string[];
+};
 
 const TheatreActivity = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TheatreFormData>({
     date: "",
     companyName: "",
     sector: "",
@@ -47,48 +78,49 @@ const TheatreActivity = () => {
     email: "",
     phone: "",
     notes: "",
+    files: [],
   });
 
   registerLocale("en", enUS);
 
-  const handleChange = <K extends keyof FormData>(
+  const handleChange = <K extends keyof TheatreFormData>(
     field: K,
-    value: FormData[K]
+    value: TheatreFormData[K]
   ) => {
     setFormData({ ...formData, [field]: value });
   };
 
-  type FormData = {
-    date: string;
-    companyName: string;
-    sector: string;
-    companyStatus: string;
-    activityType: string;
-    nature: string;
-    eventName: string;
-    county: string;
-    venue: string;
-    newVenue: string;
-    totalSessions: string;
-    jobsCreated: string;
-    indirectJobs: string;
-    directJobs: string;
-    entryType: string;
-    bookingPlatform: string;
-    newBookingPlatform: string;
-    paymentMethods: string[];
-    language: string;
-    otherLanguage: string;
-    contactPerson: string;
-    email: string;
-    phone: string;
-    notes: string;
-  };
-
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (formData: TheatreFormData) => {
     const loadingToastId = toast.loading("Submitting form...");
 
     try {
+      // First upload files to S3 if there are any
+      let fileUrls: string[] = [];
+      if (formData.files.length > 0) {
+        const uploadPromises = formData.files.map(async (file: File) => {
+          const uploadFormData = new FormData();
+          uploadFormData.append("file", file);
+
+          const uploadResponse = await fetch(
+            "http://localhost:5000/api/upload",
+            {
+              method: "POST",
+              body: uploadFormData,
+            }
+          );
+
+          if (!uploadResponse.ok) {
+            throw new Error(`Failed to upload file: ${file.name}`);
+          }
+
+          const uploadResult = await uploadResponse.json();
+          return uploadResult.url;
+        });
+
+        fileUrls = await Promise.all(uploadPromises);
+      }
+
+      // Then submit the form data with file URLs
       const response = await fetch(
         "http://localhost:5000/api/theatre-activities",
         {
@@ -96,7 +128,11 @@ const TheatreActivity = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            fileUrls,
+            files: undefined, // Remove the actual File objects
+          }),
         }
       );
 
@@ -122,7 +158,7 @@ const TheatreActivity = () => {
       });
       console.log("Success:", responseData);
 
-      // Optional: Reset form after successful submission
+      // Reset form after successful submission
       setFormData({
         date: "",
         companyName: "",
@@ -148,6 +184,7 @@ const TheatreActivity = () => {
         email: "",
         phone: "",
         notes: "",
+        files: [],
       });
       setStep(1);
     } catch (error) {
@@ -481,6 +518,7 @@ const TheatreActivity = () => {
           value={formData.notes}
           onChange={(e) => handleChange("notes", e.target.value)}
         />
+        <FileUploadComponent formData={formData} setFormData={setFormData} />
         <div className="flex justify-between mt-4">
           <Button onClick={() => setStep(3)} className="text-white">
             Back
@@ -499,12 +537,26 @@ const TheatreActivity = () => {
         <CardTitle>Summary of Submission</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2 text-sm">
-        {Object.entries(formData).map(([key, value]) => (
-          <p key={key}>
-            <strong>{key}:</strong>{" "}
-            {Array.isArray(value) ? value.join(", ") : value || "N/A"}
-          </p>
-        ))}
+        {Object.entries(formData).map(([key, value]) => {
+          if (key === "files") {
+            return (
+              <p key={key}>
+                <strong>{key}:</strong>{" "}
+                {Array.isArray(value) && value.length > 0
+                  ? (value as File[]).map((file) => file.name).join(", ")
+                  : "No files uploaded"}
+              </p>
+            );
+          }
+
+          return (
+            <p key={key}>
+              <strong>{key}:</strong>{" "}
+              {Array.isArray(value) ? value.join(", ") : value || "N/A"}
+            </p>
+          );
+        })}
+
         <div className="flex justify-between mt-4">
           <Button onClick={() => setStep(1)} className="text-white">
             Edit Submission

@@ -1,0 +1,28 @@
+export type TheatreFormData = {
+  date: string;
+  companyName: string;
+  sector: string;
+  companyStatus: string;
+  activityType: string;
+  nature: string;
+  eventName: string;
+  county: string;
+  venue: string;
+  newVenue: string;
+  totalSessions: string;
+  jobsCreated: string;
+  indirectJobs: string;
+  directJobs: string;
+  entryType: string;
+  bookingPlatform: string;
+  newBookingPlatform: string;
+  paymentMethods: string[];
+  language: string;
+  otherLanguage: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  notes: string;
+  files: File[];
+  fileUrls?: string[];
+};
